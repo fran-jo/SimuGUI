@@ -17,4 +17,21 @@
 	<natures>
 		<nature>org.python.pydev.pythonNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>lib/antlr-3.1.3.jar</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/IDEModel/OpenModelica/share/omc/java/antlr-3.1.3.jar</locationURI>
+		</link>
+		<link>
+			<name>lib/modelica_java.jar</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/IDEModel/OpenModelica/share/omc/java/modelica_java.jar</locationURI>
+		</link>
+		<link>
+			<name>lib/org.omc.graphstream.jar</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/IDEModel/OpenModelica/share/omc/java/org.omc.graphstream.jar</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

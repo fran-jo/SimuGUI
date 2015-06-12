@@ -1,0 +1,6 @@
+Load model
+Show variables of the model in the tree list
+Create properties for simulation configuration
+Create properties for simulation parameters
+
+Insert into tab python plot with sim results
