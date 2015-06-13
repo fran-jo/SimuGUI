@@ -22,13 +22,12 @@ class MainGUI:
         ret = chooseFile.showDialog(self.panel, "Choose file")
         if ret == JFileChooser.APPROVE_OPTION:
             self.faile= chooseFile.getSelectedFile()
-#             sender= event.getSource()
             if event.getActionCommand() == "Load Model":
-                self.cb1.addItem(self.faile.name)
-                self.cb1.selectedItem= self.faile.name
+                self.cbMoFile.addItem(self.faile.getPath())
+                self.cbMoFile.selectedItem= self.faile.getPath()
             if event.getActionCommand() == "Load Library":
-                self.cb2.addItem(self.faile.name)
-                self.cb2.selectedItem= self.faile.name
+                self.cbMoLib.addItem(self.faile.getPath())
+                self.cbMoLib.selectedItem= self.faile.getPath()
             print self.faile
     
     def onOpenModel(self, event):
@@ -36,30 +35,27 @@ class MainGUI:
         
     def onOpenFolder(self, event):
         chooseFile = JFileChooser()
-        filtro = FileNameExtensionFilter("mo files", ["mo"])
-        chooseFile.addChoosableFileFilter(filtro)
-        ret = chooseFile.showDialog(self.panel, "Choose file")
+        chooseFile.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        ret = chooseFile.showDialog(self.panel, "Choose folder")
         if ret == JFileChooser.APPROVE_OPTION:
             self.faile= chooseFile.getSelectedFile()
-#             sender= event.getSource()
-            if event.getActionCommand() == "Output Path":
-                self.cb4.addItem(self.faile.name)
-                self.cb4.selectedItem= self.faile.name
-            print self.faile
+            self.cbOutDir.addItem(self.faile.getPath())
+            self.cbOutDir.selectedItem= self.faile.getPath()
             
     def simulateMe(self, event):
         self.comandArea.setText("Simulate Me")
     
-    def saveConfig(self,event):
-        '''TODO: save the data from text boxes to corresponding .properties file '''
+    def saveConfigOMC(self,event):
         config= CtrlProperties('./res/simConfiguration.properties')
-        config.setmodelPath(self.cb1.selectedItem)
-        config.setmodelFile(self.faile.name)
-        config.setmodelName(self.cb3.selectedItem)
-        config.setlibraryPath(self.cb2.selectedItem)
-        config.setlibraryFile(self.cb2.selectedItem)
-        config.setoutputPath(self.cb4.selectedItem)
-        config.saveProperties()
+        config.setmodelPath(self.cbMoFile.selectedItem)
+        config.setmodelFile(self.cbMoFile.selectedItem)
+        '''TODO Open .mo file, when loaded, and get model names '''
+        config.setmodelName('self.cb3.selectedItem')
+        config.setlibraryPath(self.cbMoLib.selectedItem)
+        config.setlibraryFile(self.cbMoLib.selectedItem)
+        config.setoutputPath(self.cbOutDir.selectedItem)
+        config.saveProperties('/Users/fran_jo/PhD_CIM/PYTHON/ScriptMEE/config/simParametersOMC.properties', \
+                              'Simulation parameters for OMC')
     
     def cbSelect(self,event):
         selected = self.cb1.selectedIndex
@@ -106,26 +102,26 @@ class MainGUI:
         pOMC.setLayout(GridLayout(5,2))
         simBoton1= JButton('Load Model',actionPerformed=self.onOpenFile)
         self.dModelFile = []
-        self.cb1 = JComboBox(self.dModelFile)
+        self.cbMoFile = JComboBox(self.dModelFile)
         simBoton2= JButton('Load Library',actionPerformed=self.onOpenFile)
         self.dLibFile = []
-        self.cb2 = JComboBox(self.dLibFile)
+        self.cbMoLib = JComboBox(self.dLibFile)
         simBoton3= JButton('Select Model',actionPerformed=self.onOpenModel)
         self.dModel = []
         self.cb3 = JComboBox(self.dModel)
         simBoton4= JButton('Output Path',actionPerformed=self.onOpenFolder)
         self.dOutPath = []
-        self.cb4 = JComboBox(self.dOutPath)
+        self.cbOutDir = JComboBox(self.dOutPath)
         simBoton5= JButton('Simulate',actionPerformed=self.simulateMe)
-        simBoton6= JButton('Save Config',actionPerformed=self.saveConfig)
+        simBoton6= JButton('Save Config',actionPerformed=self.saveConfigOMC)
         ''' adding components to the gui '''
-        pOMC.add(self.cb1)
+        pOMC.add(self.cbMoFile)
         pOMC.add(simBoton1)
-        pOMC.add(self.cb2)
+        pOMC.add(self.cbMoLib)
         pOMC.add(simBoton2)
         pOMC.add(self.cb3)
         pOMC.add(simBoton3)
-        pOMC.add(self.cb4)
+        pOMC.add(self.cbOutDir)
         pOMC.add(simBoton4)
         pOMC.add(simBoton5)
         pOMC.add(simBoton6)

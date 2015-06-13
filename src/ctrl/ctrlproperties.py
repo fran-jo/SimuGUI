@@ -25,37 +25,37 @@ class CtrlProperties(object):
         Constructor
         params[0]: .properties file
         '''
-        self.prop= Properties()
-        propFile = File(params[0])
-        self.prop.load(FileInputStream(propFile))
+        self.property= Properties()
+        self.properties= {'modelPath':'','libraryPath':'','modelFile':'',\
+                          'libraryFile':'','modelName':'','outputPath':''}
         
-    def setModelPath(self, _modelPath):
+    def setmodelPath(self, _modelPath):
         separateValues= _modelPath.split(os.sep)
-        modelPath = '/'.join(separateValues)
+        modelPath = '/'.join(separateValues[:-1])
         self.properties['modelPath']= modelPath
         print modelPath
         
     def setlibraryPath(self, _libraryPath):
         separateValues= _libraryPath.split(os.sep)
-        libraryPath = '/'.join(separateValues)
+        libraryPath = '/'.join(separateValues[:-1])
         self.properties['libraryPath']= libraryPath
         print libraryPath
         
     def setmodelFile(self, _modelFile):
         separateValues= _modelFile.split(os.sep)
-        modelFile = separateValues[:,-1]
+        modelFile = separateValues[-1]
         self.properties['modelFile']= modelFile
         print modelFile
         
     def setlibraryFile(self, _libraryFile):
         separateValues= _libraryFile.split(os.sep)
-        libraryFile = separateValues[:,-1]
+        libraryFile = separateValues[-1]
         self.properties['libraryFile']= libraryFile
         print libraryFile
        
     def setmodelName(self, _modelName):
         separateValues= _modelName.split(os.sep)
-        modelName = separateValues[:,-1]
+        modelName = separateValues[-1]
         self.properties['modelName']= modelName
         print modelName
          
@@ -65,23 +65,18 @@ class CtrlProperties(object):
         self.properties['outputPath']= outputPath
         print outputPath
     
-    def saveProperties(self):
-        self.prop.setProperty('modelPath', self.properties['modelPath'])
-        self.prop.setProperty('libraryPath', self.properties['libraryPath'])
-        self.prop.setProperty('modelFile', self.properties['modelFile'])
-        self.prop.setProperty('libraryFile', self.properties['libraryFile'])
-        self.prop.getProperty("modelName", self.properties['modelName'])
-        self.prop.setProperty('outputPath', self.properties['outputPath'])
-        out = FileOutputStream(self.prop);
-        self.prop.store(out, "This is an optional header comment string");
+    def saveProperties(self, _filename, _comment):
+        for key in self.properties:
+            self.property.setProperty(key, self.properties[key])
+        fle= open(_filename,'w')
+        self.property.store(fle, _comment)
     
-    def loadProperties(self):
-        self.properties['modelPath']= str(self.prop.getProperty("modelPath"))
-        self.properties['libraryPath']= str(self.prop.getProperty("libraryPath"))
-        self.properties['modelFile']= str(self.prop.getProperty("modelFile"))
-        self.properties['libraryFile']= str(self.prop.getProperty("libraryFile"))
-        self.properties['modelName']= str(self.prop.getProperty("modelName"))
-        self.properties['outputPath']= str(self.prop.getProperty("outputPath"))
+    def loadProperties(self, _filename):
+        fle= open(_filename,'r')
+        self.property.load(fle)
+        for key in self.paramName:
+            self.properties[key]= str(self.property.getProperty(key))
+        print self.property
         
     
 class PropertiesParams(CtrlProperties):
