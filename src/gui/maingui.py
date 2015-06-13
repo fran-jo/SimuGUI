@@ -4,19 +4,25 @@ Created on 10 jun 2015
 @author: fragom
 '''
 from javax.swing import JPanel, JMenu, JMenuItem, JMenuBar, JFrame, JTree,\
-    JTextArea, JButton, JTextField, JComboBox
+    JTextArea, JButton, JComboBox
 from javax.swing import JSplitPane, JTabbedPane, JLabel, JScrollPane
 from javax.swing import JFileChooser, WindowConstants
 from javax.swing.filechooser import FileNameExtensionFilter
-from java.awt import BorderLayout, Dimension, GridLayout, FlowLayout
+from java.awt import BorderLayout, Dimension, GridLayout
+from java.io import File
 from ctrl.ctrlproperties import CtrlProperties
+from ctrl.commandOMC import CommandOMC
+import OMPython
+import os
 
 class MainGUI:
     '''
     classdocs
     '''
     def onOpenFile(self, event):
+        ''' remember to change'''
         chooseFile = JFileChooser()
+        chooseFile.setCurrentDirectory(File('C:\Users\fragom\PhD_CIM\Modelica\Models')) 
         filtro = FileNameExtensionFilter("mo files", ["mo"])
         chooseFile.addChoosableFileFilter(filtro)
         ret = chooseFile.showDialog(self.panel, "Choose file")
@@ -31,7 +37,14 @@ class MainGUI:
             print self.faile
     
     def onOpenModel(self, event):
-        print "modelo"
+        omc= CommandOMC()
+        sesion= OMPython.OMCSession()
+        comando= omc.loadFile(self.cbMoFile.selectedItem)
+        sesion.execute(comando)
+        comando= omc.getClassNames('SmarTSLab.Networks')
+        success= sesion.execute(comando)
+        print success
+        self.cb3.SetModel(self.dModel)
         
     def onOpenFolder(self, event):
         chooseFile = JFileChooser()
@@ -95,11 +108,10 @@ class MainGUI:
         frame.setJMenuBar(jMenuBar1)
         
         # Create main tab panel
-        compilerTabPane= JTabbedPane(JTabbedPane.TOP)
-        compilerTabPane.setPreferredSize(Dimension(800,400))
         ''' OpenModelica Panel '''
-        pOMC= JPanel()
-        pOMC.setLayout(GridLayout(5,2))
+        psimures= JPanel()
+        psimures.setLayout(GridLayout(5,2))
+        psimures.setPreferredSize(Dimension(800,400))
         simBoton1= JButton('Load Model',actionPerformed=self.onOpenFile)
         self.dModelFile = []
         self.cbMoFile = JComboBox(self.dModelFile)
@@ -115,52 +127,44 @@ class MainGUI:
         simBoton5= JButton('Simulate',actionPerformed=self.simulateMe)
         simBoton6= JButton('Save Config',actionPerformed=self.saveConfigOMC)
         ''' adding components to the gui '''
-        pOMC.add(self.cbMoFile)
-        pOMC.add(simBoton1)
-        pOMC.add(self.cbMoLib)
-        pOMC.add(simBoton2)
-        pOMC.add(self.cb3)
-        pOMC.add(simBoton3)
-        pOMC.add(self.cbOutDir)
-        pOMC.add(simBoton4)
-        pOMC.add(simBoton5)
-        pOMC.add(simBoton6)
-        ''' JModelica Panel '''
-        pJM= JPanel()
-        pJM.setLayout(BorderLayout())
-        ''' Dymola Panel '''
-        pDY= JPanel()
-        pDY.setLayout(BorderLayout())
-        compilerTabPane.addTab("Dymola", pDY)
-        compilerTabPane.addTab("JModelica", pJM)
-        compilerTabPane.addTab("OpenModelica", pOMC)
-        
-#         self.comandArea= JTextField('Type something here',50)
-#         simBoton= JButton('Simulate Me',actionPerformed=self.simulateMe)
-#         headerPanel.add(self.comandArea)
-#         headerPanel.add(simBoton)
+        psimures.add(self.cbMoFile)
+        psimures.add(simBoton1)
+        psimures.add(self.cbMoLib)
+        psimures.add(simBoton2)
+        psimures.add(self.cb3)
+        psimures.add(simBoton3)
+        psimures.add(self.cbOutDir)
+        psimures.add(simBoton4)
+        psimures.add(simBoton5)
+        psimures.add(simBoton6)
         
         ''' panel model '''
         simTabPane = JTabbedPane(JTabbedPane.BOTTOM)
-        pModel = JPanel()
-        pModel.setLayout(BorderLayout())
-        pscroll= JScrollPane()
-        ''' inside panel model '''
-        arbol= JTree()
-        arbol.setPreferredSize(Dimension(200,500))
+        pOMC = JPanel()
+        pOMC.setLayout(BorderLayout())
+        ''' OpenModelica Panel '''
+#         pscroll= JScrollPane()
+#         arbol= JTree()
+#         arbol.setPreferredSize(Dimension(200,500))
         self.label = JLabel('self.faile.name')
-        pModel.add(self.label,BorderLayout.PAGE_START)
-        pModel.add(pscroll.add(arbol),BorderLayout.LINE_START)
-        simTabPane.addTab("Model View", pModel)
-        ''' panel results '''
-        panelRes = JPanel(BorderLayout())
+        pOMC.add(self.label,BorderLayout.PAGE_START)
+#         pOMC.add(pscroll.add(arbol),BorderLayout.LINE_START)
+        simTabPane.addTab("OpenModelica", pOMC)
+        ''' JModelica Panel '''
+        pJM = JPanel(BorderLayout())
         areatext= JTextArea()
-        areatext.alignmentX = panelRes.CENTER_ALIGNMENT
-        panelRes.add(areatext, BorderLayout.CENTER)
-        simTabPane.addTab("Results View", panelRes)
+        areatext.alignmentX = pJM.CENTER_ALIGNMENT
+        pJM.add(areatext, BorderLayout.CENTER)
+        simTabPane.addTab("JModelica", pJM)
+        ''' Dymola Panel '''
+        pDY = JPanel(BorderLayout())
+        areatext= JTextArea()
+        areatext.alignmentX = pDY.CENTER_ALIGNMENT
+        pDY.add(areatext, BorderLayout.CENTER)
+        simTabPane.addTab("Dymola", pDY)
         
         # show the GUI
-        splitPane.add(compilerTabPane)
+        splitPane.add(psimures)
         splitPane.add(simTabPane);
         frame.add(splitPane)
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)

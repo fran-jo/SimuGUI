@@ -1,6 +1,11 @@
-Load model
-Show variables of the model in the tree list
+ScriptMEE
+Load model - (solve import omnipy problem)
 Create properties for simulation configuration
-Create properties for simulation parameters
-
 Insert into tab python plot with sim results
+
+ScriptMAE
+Create selection of simulation signals
+Create selection of simulation measurements
+Insert plot into screen
+Button command for calculating modes
+Insert mode plot into screen

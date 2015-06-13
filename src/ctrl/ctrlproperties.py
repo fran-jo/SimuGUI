@@ -4,7 +4,6 @@ Created on 12 jun 2015
 @author: fragom
 '''
 from java.util import Properties
-from java.io import File, FileInputStream, FileOutputStream
 import os
 
 class CtrlProperties(object):
