@@ -1,5 +1,5 @@
 ScriptMEE
-Load model - (solve import omnipy problem)
+Load model - (solve import omnipy problem) with corba.omcproxy
 Create properties for simulation configuration
 Insert into tab python plot with sim results
 

@@ -3,17 +3,19 @@ Created on 10 jun 2015
 
 @author: fragom
 '''
-from javax.swing import JPanel, JMenu, JMenuItem, JMenuBar, JFrame, JTree,\
-    JTextArea, JButton, JComboBox
-from javax.swing import JSplitPane, JTabbedPane, JLabel, JScrollPane
+from javax.swing import JPanel, JMenu, JMenuItem, JMenuBar, JFrame,\
+    JButton, JComboBox, JTextField
+from javax.swing import JSplitPane, JRadioButton, JLabel
 from javax.swing import JFileChooser, WindowConstants
 from javax.swing.filechooser import FileNameExtensionFilter
 from java.awt import BorderLayout, Dimension, GridLayout
 from java.io import File
-from ctrl.ctrlproperties import CtrlProperties
+from ctrl.ctrlproperties import CtrlProperties, PropertiesConfigJM, PropertiesConfigOMCDY
 from ctrl.commandOMC import CommandOMC
 import OMPython
-import os
+from org.openmodelica.corba import OMCProxy, SmartProxy
+from org.openmodelica.corba.parser import OMCStringParser
+from org.openmodelica import ModelicaArray
 
 class MainGUI:
     '''
@@ -37,14 +39,17 @@ class MainGUI:
             print self.faile
     
     def onOpenModel(self, event):
-        omc= CommandOMC()
-        sesion= OMPython.OMCSession()
-        comando= omc.loadFile(self.cbMoFile.selectedItem)
-        sesion.execute(comando)
-        comando= omc.getClassNames('SmarTSLab.Networks')
-        success= sesion.execute(comando)
-        print success
-        self.cb3.SetModel(self.dModel)
+        omcscript= CommandOMC()
+        omc= OMCProxy("FTP")
+        comando= omcscript.loadFile(self.cbMoFile.selectedItem)
+        result = omc.sendExpression(comando)
+        comando= omcscript.getClassNames('SmarTSLab.Networks')
+        result = omc.sendExpression(comando)
+        print 'result OMCProxy', result.__class__.__name__
+        print 'result.res', result.res[1:-2]
+        listname= result.res[1:-2].split(',')
+        for nombre in listname:
+            self.cbModel.addItem(nombre)
         
     def onOpenFolder(self, event):
         chooseFile = JFileChooser()
@@ -56,25 +61,37 @@ class MainGUI:
             self.cbOutDir.selectedItem= self.faile.getPath()
             
     def simulateMe(self, event):
-        self.comandArea.setText("Simulate Me")
+        omcscript= CommandOMC()
+        omc= OMCProxy("FTP")
+        comando= omcscript.loadFile(self.cbMoFile.selectedItem)
     
-    def saveConfigOMC(self,event):
-        config= CtrlProperties('./res/simConfiguration.properties')
+    def saveResources(self,event):
+        config= CtrlProperties()
         config.setmodelPath(self.cbMoFile.selectedItem)
         config.setmodelFile(self.cbMoFile.selectedItem)
         '''TODO Open .mo file, when loaded, and get model names '''
-        config.setmodelName('self.cb3.selectedItem')
+        config.setmodelName(self.cbModel.selectedItem)
         config.setlibraryPath(self.cbMoLib.selectedItem)
         config.setlibraryFile(self.cbMoLib.selectedItem)
         config.setoutputPath(self.cbOutDir.selectedItem)
-        config.saveProperties('/Users/fran_jo/PhD_CIM/PYTHON/ScriptMEE/config/simParametersOMC.properties', \
-                              'Simulation parameters for OMC')
+        config.saveProperties('./res/simParameters.properties', \
+                              'Simulation resources')
     
-    def cbSelect(self,event):
-        selected = self.cb1.selectedIndex
-        if selected >= 0:
-            data = self.data[selected]
-            self.label.text = data + " selected"
+    def saveConfiguration(self,event):
+        if self.radioBtn1.isSelected() or self.radioBtn2.isSelected():
+            config= PropertiesConfigOMCDY()
+            config.setmodelPath(self.cbMoFile.selectedItem)
+            config.setmodelFile(self.cbMoFile.selectedItem)
+            '''TODO Open .mo file, when loaded, and get model names '''
+            config.setmodelName(self.cbModel.selectedItem)
+            config.setlibraryPath(self.cbMoLib.selectedItem)
+            config.setlibraryFile(self.cbMoLib.selectedItem)
+            config.setoutputPath(self.cbOutDir.selectedItem)
+        if self.radioBtn3.isSelected():
+            config= PropertiesConfigJM()
+            
+        config.saveProperties('./res/simConfiguration.properties',\
+                              'Simulation configuration')
   
     def __init__(self):
         self.open= False
@@ -120,52 +137,81 @@ class MainGUI:
         self.cbMoLib = JComboBox(self.dLibFile)
         simBoton3= JButton('Select Model',actionPerformed=self.onOpenModel)
         self.dModel = []
-        self.cb3 = JComboBox(self.dModel)
+        self.cbModel = JComboBox(self.dModel)
         simBoton4= JButton('Output Path',actionPerformed=self.onOpenFolder)
         self.dOutPath = []
         self.cbOutDir = JComboBox(self.dOutPath)
         simBoton5= JButton('Simulate',actionPerformed=self.simulateMe)
-        simBoton6= JButton('Save Config',actionPerformed=self.saveConfigOMC)
+        simBoton6= JButton('Save Resources',actionPerformed=self.saveResources)
         ''' adding components to the gui '''
         psimures.add(self.cbMoFile)
         psimures.add(simBoton1)
         psimures.add(self.cbMoLib)
         psimures.add(simBoton2)
-        psimures.add(self.cb3)
+        psimures.add(self.cbModel)
         psimures.add(simBoton3)
         psimures.add(self.cbOutDir)
         psimures.add(simBoton4)
         psimures.add(simBoton5)
         psimures.add(simBoton6)
-        
+        simBoton7= JButton('Save Configuration', actionPerformed= self.saveCongiguration)
         ''' panel model '''
-        simTabPane = JTabbedPane(JTabbedPane.BOTTOM)
-        pOMC = JPanel()
-        pOMC.setLayout(BorderLayout())
-        ''' OpenModelica Panel '''
-#         pscroll= JScrollPane()
-#         arbol= JTree()
-#         arbol.setPreferredSize(Dimension(200,500))
-        self.label = JLabel('self.faile.name')
-        pOMC.add(self.label,BorderLayout.PAGE_START)
+#         simTabPane = JTabbedPane(JTabbedPane.BOTTOM)
+        pconfig = JPanel()
+        pconfig.setLayout(GridLayout(9,4))
+        ''' Configuration Panel '''
+        self.label = JLabel('Configuration panel')
+        self.radioBtn1 = JRadioButton('OpenModelica')
+        self.radioBtn2 = JRadioButton('JModelica')
+        self.radioBtn3 = JRadioButton('Dymola')
+        self.cbsolver= JComboBox(['dassl','rkfix2'])
+        self.cbalgorithm= JComboBox(['AssimuloAlg'])
+        self.cboutformat= JComboBox(['.mat','.h5','.csv'])
+        self.cbinitialize= JComboBox(['True','False'])
+        self.txtinterval= JTextField('0')
+        self.txttolerance= JTextField('0')
+        self.txtstart= JTextField('0')
+        self.txtstop= JTextField('0')
+        self.
+        ''' adding components to the panel '''
+        pconfig.add(self.radioBtn1)
+        pconfig.add(self.radioBtn2)
+        pconfig.add(self.radioBtn3)
+        pconfig.add(JLabel('start time'))
+        pconfig.add(self.txtstart)
+        pconfig.add(JLabel('start time'))
+        pconfig.add(self.txtstop)
+        pconfig.add(JLabel('solver'))
+        pconfig.add(self.cbsolver)
+        pconfig.add(JLabel('algorithm'))
+        pconfig.add(self.cbalgorithm)
+        pconfig.add(JLabel('interval/ncp'))
+        pconfig.add(self.txtinterval)
+        pconfig.add(JLabel('tolerance'))
+        pconfig.add(self.txttolerance)
+        pconfig.add(JLabel('output format'))
+        pconfig.add(self.cboutformat)
+        pconfig.add(JLabel('Initialize'))
+        pconfig.add(self.cbinitialize)
+        
 #         pOMC.add(pscroll.add(arbol),BorderLayout.LINE_START)
-        simTabPane.addTab("OpenModelica", pOMC)
-        ''' JModelica Panel '''
-        pJM = JPanel(BorderLayout())
-        areatext= JTextArea()
-        areatext.alignmentX = pJM.CENTER_ALIGNMENT
-        pJM.add(areatext, BorderLayout.CENTER)
-        simTabPane.addTab("JModelica", pJM)
-        ''' Dymola Panel '''
-        pDY = JPanel(BorderLayout())
-        areatext= JTextArea()
-        areatext.alignmentX = pDY.CENTER_ALIGNMENT
-        pDY.add(areatext, BorderLayout.CENTER)
-        simTabPane.addTab("Dymola", pDY)
+#         simTabPane.addTab("OpenModelica", pOMC)
+#         ''' JModelica Panel '''
+#         pJM = JPanel(BorderLayout())
+#         areatext= JTextArea()
+#         areatext.alignmentX = pJM.CENTER_ALIGNMENT
+#         pJM.add(areatext, BorderLayout.CENTER)
+#         simTabPane.addTab("JModelica", pJM)
+#         ''' Dymola Panel '''
+#         pDY = JPanel(BorderLayout())
+#         areatext= JTextArea()
+#         areatext.alignmentX = pDY.CENTER_ALIGNMENT
+#         pDY.add(areatext, BorderLayout.CENTER)
+#         simTabPane.addTab("Dymola", pDY)
         
         # show the GUI
         splitPane.add(psimures)
-        splitPane.add(simTabPane);
+        splitPane.add(pconfig);
         frame.add(splitPane)
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
         frame.setVisible(True)

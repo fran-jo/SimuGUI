@@ -19,7 +19,7 @@ class CtrlProperties(object):
     '''
     properties= {} 
     
-    def __init__(self, params):
+    def __init__(self):
         '''
         Constructor
         params[0]: .properties file
@@ -78,11 +78,34 @@ class CtrlProperties(object):
         print self.property
         
     
-class PropertiesParams(CtrlProperties):
+class PropertiesResources(CtrlProperties):
     '''
     classdocs
     '''
     
     def __init__(self):
-        ''' a '''
+        ''' '''
         
+class PropertiesConfigOMCDY(CtrlProperties):
+    '''
+    classdocs
+    '''
+    
+    def __init__(self):
+        ''' 
+        Constructor
+        '''
+        self.propOmcDy= {'startTime':'','stopTime':'','numberOfIntervals':'',\
+                          'tolerance':'','method':'','outputFormat':''}
+
+class PropertiesConfigJM(CtrlProperties):
+    '''
+    classdocs
+    '''
+    
+    def __init__(self):
+        ''' 
+        Constructor
+        '''
+        self.propJM= {'start_time':'','final_time':'','algorithm':'',\
+                          'ncp':'','solver':'','initialize':''}
