@@ -9,7 +9,33 @@ import os
 class CtrlProperties(object):
     '''
     classdocs
+    '''
+
+    def __init__(self):
+        '''
+        Constructor
+        params[0]: .properties file
+        '''
+        self.propertyF= Properties()
+        self.properties= {'default':'property'}
+        
+    def saveProperties(self, _filename, _comment):
+        for key in self.properties:
+            self.propertyF.setProperty(key, self.properties[key])
+        fle= open(_filename,'w')
+        self.propertyF.store(fle, _comment)
     
+    def loadProperties(self, _filename):
+        fle= open(_filename,'r')
+        self.property.load(fle)
+        for key in self.paramName:
+            self.propertyF[key]= str(self.propertyF.getProperty(key))
+        print self.property
+        
+    
+class PrptResources(CtrlProperties):
+    '''
+    classdocs
     modelPath=''
     libraryPath=''
     modelFile=''
@@ -22,12 +48,11 @@ class CtrlProperties(object):
     def __init__(self):
         '''
         Constructor
-        params[0]: .properties file
         '''
-        self.property= Properties()
+        CtrlProperties.__init__(self)
         self.properties= {'modelPath':'','libraryPath':'','modelFile':'',\
                           'libraryFile':'','modelName':'','outputPath':''}
-        
+                          
     def setmodelPath(self, _modelPath):
         separateValues= _modelPath.split(os.sep)
         modelPath = '/'.join(separateValues[:-1])
@@ -63,30 +88,9 @@ class CtrlProperties(object):
         outputPath = '/'.join(separateValues)
         self.properties['outputPath']= outputPath
         print outputPath
-    
-    def saveProperties(self, _filename, _comment):
-        for key in self.properties:
-            self.property.setProperty(key, self.properties[key])
-        fle= open(_filename,'w')
-        self.property.store(fle, _comment)
-    
-    def loadProperties(self, _filename):
-        fle= open(_filename,'r')
-        self.property.load(fle)
-        for key in self.paramName:
-            self.properties[key]= str(self.property.getProperty(key))
-        print self.property
+       
         
-    
-class PropertiesResources(CtrlProperties):
-    '''
-    classdocs
-    '''
-    
-    def __init__(self):
-        ''' '''
-        
-class PropertiesConfigOMCDY(CtrlProperties):
+class PrptConfigurationOMCDY(CtrlProperties):
     '''
     classdocs
     '''
@@ -95,10 +99,37 @@ class PropertiesConfigOMCDY(CtrlProperties):
         ''' 
         Constructor
         '''
-        self.propOmcDy= {'startTime':'','stopTime':'','numberOfIntervals':'',\
+        CtrlProperties.__init__(self)
+        self.properties= {'startTime':'','stopTime':'','numberOfIntervals':'',\
                           'tolerance':'','method':'','outputFormat':''}
+        self.compiler= 'openmodelica'
+        
+    def setstarttime(self, _value):
+        self.properties['startTime']= _value
+        print _value
+        
+    def setstoptime(self, _value):
+        self.properties['stopTime']= _value
+        print _value
+        
+    def setintervals(self, _value):
+        self.properties['numberOfIntervals']= _value
+        print _value
+        
+    def settolerance(self, _value):
+        self.properties['tolerance']= _value
+        print _value
+       
+    def setmethod(self, _value):
+        self.properties['method']= _value
+        print _value
+         
+    def setoutputformat(self, _value):
+        self.properties['outputFormat']= _value
+        print _value
 
-class PropertiesConfigJM(CtrlProperties):
+
+class PrptConfigurationJM(PrptConfigurationOMCDY):
     '''
     classdocs
     '''
@@ -107,5 +138,30 @@ class PropertiesConfigJM(CtrlProperties):
         ''' 
         Constructor
         '''
-        self.propJM= {'start_time':'','final_time':'','algorithm':'',\
+        PrptConfigurationOMCDY.__init__(self)
+        self.properties= {'start_time':'','final_time':'','algorithm':'',\
                           'ncp':'','solver':'','initialize':''}
+        
+    def setstarttime(self, _value):
+        self.properties['start_time']= _value
+        print _value
+        
+    def setstoptime(self, _value):
+        self.properties['final_time']= _value
+        print _value
+        
+    def setintervals(self, _value):
+        self.properties['ncp']= _value
+        print _value
+        
+    def setalgorithm(self, _value):
+        self.properties['algorithm']= _value
+        print _value
+       
+    def setmethod(self, _value):
+        self.properties['solver']= _value
+        print _value
+         
+    def setinitialization(self, _value):
+        self.properties['initialize']= _value
+        print _value

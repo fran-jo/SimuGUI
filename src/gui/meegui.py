@@ -5,24 +5,21 @@ Created on 10 jun 2015
 '''
 from javax.swing import JPanel, JMenu, JMenuItem, JMenuBar, JFrame,\
     JButton, JComboBox, JTextField
-from javax.swing import JSplitPane, JRadioButton, JLabel
+from javax.swing import JSplitPane, JRadioButton, JLabel, ButtonGroup
 from javax.swing import JFileChooser, WindowConstants
 from javax.swing.filechooser import FileNameExtensionFilter
 from java.awt import BorderLayout, Dimension, GridLayout
 from java.io import File
-from ctrl.ctrlproperties import CtrlProperties, PropertiesConfigJM, PropertiesConfigOMCDY
+from ctrl.ctrlproperties import PrptResources, PrptConfigurationOMCDY, PrptConfigurationJM
 from ctrl.commandOMC import CommandOMC
-import OMPython
-from org.openmodelica.corba import OMCProxy, SmartProxy
-from org.openmodelica.corba.parser import OMCStringParser
-from org.openmodelica import ModelicaArray
+from org.openmodelica.corba import OMCProxy
 
 class MainGUI:
     '''
     classdocs
     '''
     def onOpenFile(self, event):
-        ''' remember to change'''
+        ''' remember to change the path'''
         chooseFile = JFileChooser()
         chooseFile.setCurrentDirectory(File('C:\Users\fragom\PhD_CIM\Modelica\Models')) 
         filtro = FileNameExtensionFilter("mo files", ["mo"])
@@ -61,37 +58,51 @@ class MainGUI:
             self.cbOutDir.selectedItem= self.faile.getPath()
             
     def simulateMe(self, event):
+        ''' TODO: execute either OMPython or OMCProxy (java) for simulation '''
         omcscript= CommandOMC()
         omc= OMCProxy("FTP")
         comando= omcscript.loadFile(self.cbMoFile.selectedItem)
     
     def saveResources(self,event):
-        config= CtrlProperties()
+        config= PrptResources()
         config.setmodelPath(self.cbMoFile.selectedItem)
         config.setmodelFile(self.cbMoFile.selectedItem)
-        '''TODO Open .mo file, when loaded, and get model names '''
         config.setmodelName(self.cbModel.selectedItem)
         config.setlibraryPath(self.cbMoLib.selectedItem)
         config.setlibraryFile(self.cbMoLib.selectedItem)
         config.setoutputPath(self.cbOutDir.selectedItem)
-        config.saveProperties('./res/simParameters.properties', \
-                              'Simulation resources')
+        if self.radioBtnOMC.isSelected():
+            nomfile= './config/simParametersOMC.properties'
+        if self.radioBtnJM.isSelected():
+            nomfile= './config/simParametersJM.properties'
+        if self.radioBtnDY.isSelected():
+            nomfile= './config/simParametersDY.properties'
+        config.saveProperties(nomfile, 'Simulation resources')
     
     def saveConfiguration(self,event):
-        if self.radioBtn1.isSelected() or self.radioBtn2.isSelected():
-            config= PropertiesConfigOMCDY()
-            config.setmodelPath(self.cbMoFile.selectedItem)
-            config.setmodelFile(self.cbMoFile.selectedItem)
-            '''TODO Open .mo file, when loaded, and get model names '''
-            config.setmodelName(self.cbModel.selectedItem)
-            config.setlibraryPath(self.cbMoLib.selectedItem)
-            config.setlibraryFile(self.cbMoLib.selectedItem)
-            config.setoutputPath(self.cbOutDir.selectedItem)
-        if self.radioBtn3.isSelected():
-            config= PropertiesConfigJM()
-            
-        config.saveProperties('./res/simConfiguration.properties',\
-                              'Simulation configuration')
+        if self.radioBtnOMC.isSelected() or self.radioBtnDY.isSelected():
+            config= PrptConfigurationOMCDY()
+            config.setstarttime(self.txtstart.getText())
+            config.setstoptime(self.txtstop.getText())
+            config.settolerance(self.txttolerance.getText())
+            config.setintervals(self.txtinterval.getText())
+            config.setmethod(self.cbsolver.selectedItem)
+            config.setoutputformat(self.cboutformat.selectedItem)
+            if self.radioBtnOMC.isSelected():
+                nomfile= './config/simConfigurationOMC.properties'
+            if self.radioBtnDY.isSelected():
+                nomfile= './config/simConfigurationDY.properties'
+            config.saveProperties(nomfile, 'Simulation Configuration')
+        if self.radioBtnJM.isSelected():
+            config= PrptConfigurationJM()
+            config.setstarttime(self.txtstart.getText())
+            config.setstoptime(self.txtstop.getText())
+            config.setintervals(self.txtinterval.text)
+            config.setmethod(self.cbsolver.selectedItem)
+            config.setalgorithm(self.cbalgorithm.selectedItem)
+            config.setinitialization(self.cbinitialize.selectedItem)
+            nomfile= './config/simConfigurationJM.properties'
+            config.saveProperties(nomfile, 'Simulation Configuration')
   
     def __init__(self):
         self.open= False
@@ -100,7 +111,7 @@ class MainGUI:
         frame = JFrame("GUI Development ")
         frame.setSize(800, 600)
         frame.setLayout(BorderLayout())
-        splitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
         
         # Create the menu
         '''Menu File'''
@@ -154,16 +165,17 @@ class MainGUI:
         psimures.add(simBoton4)
         psimures.add(simBoton5)
         psimures.add(simBoton6)
-        simBoton7= JButton('Save Configuration', actionPerformed= self.saveCongiguration)
+        bSaveCfg= JButton('Save Configuration', actionPerformed= self.saveConfiguration)
+        bSimulation= JButton('Simulate', actionPerformed= self.simulateMe)
         ''' panel model '''
 #         simTabPane = JTabbedPane(JTabbedPane.BOTTOM)
         pconfig = JPanel()
         pconfig.setLayout(GridLayout(9,4))
         ''' Configuration Panel '''
         self.label = JLabel('Configuration panel')
-        self.radioBtn1 = JRadioButton('OpenModelica')
-        self.radioBtn2 = JRadioButton('JModelica')
-        self.radioBtn3 = JRadioButton('Dymola')
+        self.radioBtnOMC = JRadioButton('OpenModelica')
+        self.radioBtnJM = JRadioButton('JModelica')
+        self.radioBtnDY = JRadioButton('Dymola')
         self.cbsolver= JComboBox(['dassl','rkfix2'])
         self.cbalgorithm= JComboBox(['AssimuloAlg'])
         self.cboutformat= JComboBox(['.mat','.h5','.csv'])
@@ -172,11 +184,14 @@ class MainGUI:
         self.txttolerance= JTextField('0')
         self.txtstart= JTextField('0')
         self.txtstop= JTextField('0')
-        self.
         ''' adding components to the panel '''
-        pconfig.add(self.radioBtn1)
-        pconfig.add(self.radioBtn2)
-        pconfig.add(self.radioBtn3)
+        pconfig.add(self.radioBtnOMC)
+        pconfig.add(self.radioBtnJM)
+        pconfig.add(self.radioBtnDY)
+        rbBtnGroup = ButtonGroup()
+        rbBtnGroup.add(self.radioBtnOMC)
+        rbBtnGroup.add(self.radioBtnJM)
+        rbBtnGroup.add(self.radioBtnDY)
         pconfig.add(JLabel('start time'))
         pconfig.add(self.txtstart)
         pconfig.add(JLabel('start time'))
@@ -193,6 +208,8 @@ class MainGUI:
         pconfig.add(self.cboutformat)
         pconfig.add(JLabel('Initialize'))
         pconfig.add(self.cbinitialize)
+        pconfig.add(bSaveCfg)
+        pconfig.add(bSimulation)
         
 #         pOMC.add(pscroll.add(arbol),BorderLayout.LINE_START)
 #         simTabPane.addTab("OpenModelica", pOMC)

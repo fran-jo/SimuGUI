@@ -1,11 +1,12 @@
+Aquest projecte te com a dependencies els altres projetes python MEE, MAE i SE
+
 ScriptMEE
-Load model - (solve import omnipy problem) with corba.omcproxy
 Create properties for simulation configuration
 Insert into tab python plot with sim results
 
 ScriptMAE
-Create selection of simulation signals
-Create selection of simulation measurements
 Insert plot into screen
 Button command for calculating modes
 Insert mode plot into screen
+
+simular ieee 9 bus
