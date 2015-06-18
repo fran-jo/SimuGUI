@@ -3,8 +3,7 @@ Created on 10 jun 2015
 
 @author: fragom
 '''
-from javax.swing import JPanel, JMenu, JMenuItem, JMenuBar, JFrame,\
-    JButton, JComboBox, JTextField
+from javax.swing import JPanel, JFrame, JButton, JComboBox, JTextField, JProgressBar
 from javax.swing import JSplitPane, JRadioButton, JLabel, ButtonGroup
 from javax.swing import JFileChooser, WindowConstants
 from javax.swing.filechooser import FileNameExtensionFilter
@@ -16,7 +15,7 @@ from org.openmodelica.corba import OMCProxy
 
 class MainGUI:
     '''
-    classdocs
+    TODO: Create a routine to load the values from both .properties
     '''
     def onOpenFile(self, event):
         ''' remember to change the path'''
@@ -40,10 +39,11 @@ class MainGUI:
         omc= OMCProxy("FTP")
         comando= omcscript.loadFile(self.cbMoFile.selectedItem)
         result = omc.sendExpression(comando)
-        comando= omcscript.getClassNames('SmarTSLab.Networks')
+        ''' TODO: Parametrizar este comando '''
+        comando= omcscript.getClassNames('SmarTSLab.Models')
         result = omc.sendExpression(comando)
-        print 'result OMCProxy', result.__class__.__name__
-        print 'result.res', result.res[1:-2]
+#         print 'result OMCProxy', result.__class__.__name__
+#         print 'result.res', result.res[1:-2]
         listname= result.res[1:-2].split(',')
         for nombre in listname:
             self.cbModel.addItem(nombre)
@@ -60,49 +60,68 @@ class MainGUI:
     def simulateMe(self, event):
         ''' TODO: execute either OMPython or OMCProxy (java) for simulation '''
         omcscript= CommandOMC()
-        omc= OMCProxy("FTP")
+        omc= OMCProxy("Simulate")
+        ''' load Modelica '''
+        comando= omcscript.loadModelica()
+        result = omc.sendExpression(comando)
+        ''' load .mo file '''
         comando= omcscript.loadFile(self.cbMoFile.selectedItem)
+        result = omc.sendExpression(comando)
+        ''' load library '''
+        comando= omcscript.loadFile(self.cbMoLib.selectedItem)
+        result = omc.sendExpression(comando)
+        ''' get the sim options from the properties object '''
+        ''' TODO: crear bien el nombre del modelo '''
+        strmodel= []
+        strmodel.append('SmarTSLab.Models.')
+        strmodel.append(self.cbModel.selectedItem)
+        comando= omcscript.simulate(''.join(strmodel), self.config.getProperties(), False)
+        result = omc.sendExpression(comando)
+        ''' TODO: Get the result file and save it to output dir'''
+        ''' TODO: incluir rutina para guardar formato en .h5, clase addicional a PhasorMeasH5'''
+        print result.res
     
     def saveResources(self,event):
-        config= PrptResources()
-        config.setmodelPath(self.cbMoFile.selectedItem)
-        config.setmodelFile(self.cbMoFile.selectedItem)
-        config.setmodelName(self.cbModel.selectedItem)
-        config.setlibraryPath(self.cbMoLib.selectedItem)
-        config.setlibraryFile(self.cbMoLib.selectedItem)
-        config.setoutputPath(self.cbOutDir.selectedItem)
+        self.config= PrptResources()
+        self.config.setmodelPath(self.cbMoFile.selectedItem)
+        self.config.setmodelFile(self.cbMoFile.selectedItem)
+        self.config.setmodelName(self.cbModel.selectedItem)
+        self.config.setlibraryPath(self.cbMoLib.selectedItem)
+        self.config.setlibraryFile(self.cbMoLib.selectedItem)
+        self.config.setoutputPath(self.cbOutDir.selectedItem)
         if self.radioBtnOMC.isSelected():
             nomfile= './config/simParametersOMC.properties'
         if self.radioBtnJM.isSelected():
             nomfile= './config/simParametersJM.properties'
         if self.radioBtnDY.isSelected():
             nomfile= './config/simParametersDY.properties'
-        config.saveProperties(nomfile, 'Simulation resources')
+        self.config.saveProperties(nomfile, 'Simulation resources')
     
     def saveConfiguration(self,event):
         if self.radioBtnOMC.isSelected() or self.radioBtnDY.isSelected():
-            config= PrptConfigurationOMCDY()
-            config.setstarttime(self.txtstart.getText())
-            config.setstoptime(self.txtstop.getText())
-            config.settolerance(self.txttolerance.getText())
-            config.setintervals(self.txtinterval.getText())
-            config.setmethod(self.cbsolver.selectedItem)
-            config.setoutputformat(self.cboutformat.selectedItem)
+            self.config= PrptConfigurationOMCDY()
+            self.config.setstarttime(self.txtstart.getText())
+            self.config.setstoptime(self.txtstop.getText())
+            self.config.settolerance(self.txttolerance.getText())
+            self.config.setintervals(self.txtinterval.getText())
+            self.config.setmethod(self.cbsolver.selectedItem)
+            self.config.setoutputformat(self.cboutformat.selectedItem)
             if self.radioBtnOMC.isSelected():
                 nomfile= './config/simConfigurationOMC.properties'
             if self.radioBtnDY.isSelected():
                 nomfile= './config/simConfigurationDY.properties'
-            config.saveProperties(nomfile, 'Simulation Configuration')
+            self.config.saveProperties(nomfile, 'Simulation Configuration')
         if self.radioBtnJM.isSelected():
-            config= PrptConfigurationJM()
-            config.setstarttime(self.txtstart.getText())
-            config.setstoptime(self.txtstop.getText())
-            config.setintervals(self.txtinterval.text)
-            config.setmethod(self.cbsolver.selectedItem)
-            config.setalgorithm(self.cbalgorithm.selectedItem)
-            config.setinitialization(self.cbinitialize.selectedItem)
+            self.config= PrptConfigurationJM()
+            self.config.setstarttime(self.txtstart.getText())
+            self.config.setstoptime(self.txtstop.getText())
+            self.config.setintervals(self.txtinterval.text)
+            self.config.setmethod(self.cbsolver.selectedItem)
+            self.config.setalgorithm(self.cbalgorithm.selectedItem)
+            self.config.setinitialization(self.cbinitialize.selectedItem)
             nomfile= './config/simConfigurationJM.properties'
-            config.saveProperties(nomfile, 'Simulation Configuration')
+            self.config.saveProperties(nomfile, 'Simulation Configuration')
+        self.bSimulation.enabled= 1
   
     def __init__(self):
         self.open= False
@@ -112,28 +131,6 @@ class MainGUI:
         frame.setSize(800, 600)
         frame.setLayout(BorderLayout())
         splitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
-        
-        # Create the menu
-        '''Menu File'''
-        jMenuBar1 = JMenuBar()
-        jMenu1 = JMenu()
-        jMenu1.setText('File')
-        jMenuItem1 = JMenuItem('Open', actionPerformed= self.onOpenFile)
-        jMenuItem2 = JMenuItem()
-        jMenuItem2.setText('Exit')
-        jMenu1.add(jMenuItem1)
-        jMenu1.add(jMenuItem2)
-        '''Menu Simulation'''
-        jMenu2 = JMenu()
-        jMenu2.setText('Simulation')
-        jMenuItem21 = JMenuItem('Simulation Options')
-        jMenuItem23 = JMenuItem('Generate FMU')
-        jMenu2.add(jMenuItem21)
-        jMenu2.add(jMenuItem23)
-        '''Add menu to menu bar and frame'''
-        jMenuBar1.add(jMenu1)
-        jMenuBar1.add(jMenu2)
-        frame.setJMenuBar(jMenuBar1)
         
         # Create main tab panel
         ''' OpenModelica Panel '''
@@ -152,8 +149,7 @@ class MainGUI:
         simBoton4= JButton('Output Path',actionPerformed=self.onOpenFolder)
         self.dOutPath = []
         self.cbOutDir = JComboBox(self.dOutPath)
-        simBoton5= JButton('Simulate',actionPerformed=self.simulateMe)
-        simBoton6= JButton('Save Resources',actionPerformed=self.saveResources)
+        bsaveSource= JButton('Save Resources',actionPerformed=self.saveResources)
         ''' adding components to the gui '''
         psimures.add(self.cbMoFile)
         psimures.add(simBoton1)
@@ -163,10 +159,10 @@ class MainGUI:
         psimures.add(simBoton3)
         psimures.add(self.cbOutDir)
         psimures.add(simBoton4)
-        psimures.add(simBoton5)
-        psimures.add(simBoton6)
+        psimures.add(bsaveSource)
         bSaveCfg= JButton('Save Configuration', actionPerformed= self.saveConfiguration)
-        bSimulation= JButton('Simulate', actionPerformed= self.simulateMe)
+        self.bSimulation= JButton('Simulate', actionPerformed= self.simulateMe)
+        self.bSimulation.enabled= 0
         ''' panel model '''
 #         simTabPane = JTabbedPane(JTabbedPane.BOTTOM)
         pconfig = JPanel()
@@ -184,6 +180,8 @@ class MainGUI:
         self.txttolerance= JTextField('0')
         self.txtstart= JTextField('0')
         self.txtstop= JTextField('0')
+        self.lblResult= JLabel('Simulation information')
+        simProgress= JProgressBar()
         ''' adding components to the panel '''
         pconfig.add(self.radioBtnOMC)
         pconfig.add(self.radioBtnJM)
@@ -192,24 +190,26 @@ class MainGUI:
         rbBtnGroup.add(self.radioBtnOMC)
         rbBtnGroup.add(self.radioBtnJM)
         rbBtnGroup.add(self.radioBtnDY)
-        pconfig.add(JLabel('start time'))
+        pconfig.add(JLabel('Start time'))
         pconfig.add(self.txtstart)
-        pconfig.add(JLabel('start time'))
+        pconfig.add(JLabel('Stop time'))
         pconfig.add(self.txtstop)
-        pconfig.add(JLabel('solver'))
+        pconfig.add(JLabel('Solver'))
         pconfig.add(self.cbsolver)
-        pconfig.add(JLabel('algorithm'))
+        pconfig.add(JLabel('Algorithm (JM)'))
         pconfig.add(self.cbalgorithm)
-        pconfig.add(JLabel('interval/ncp'))
+        pconfig.add(JLabel('Interval'))
         pconfig.add(self.txtinterval)
-        pconfig.add(JLabel('tolerance'))
+        pconfig.add(JLabel('Tolerance'))
         pconfig.add(self.txttolerance)
-        pconfig.add(JLabel('output format'))
+        pconfig.add(JLabel('Output format'))
         pconfig.add(self.cboutformat)
-        pconfig.add(JLabel('Initialize'))
+        pconfig.add(JLabel('Initialize (JM)'))
         pconfig.add(self.cbinitialize)
         pconfig.add(bSaveCfg)
-        pconfig.add(bSimulation)
+        pconfig.add(self.bSimulation)
+        pconfig.add(self.lblResult)
+        pconfig.add(simProgress)
         
 #         pOMC.add(pscroll.add(arbol),BorderLayout.LINE_START)
 #         simTabPane.addTab("OpenModelica", pOMC)

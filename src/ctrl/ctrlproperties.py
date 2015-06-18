@@ -27,11 +27,16 @@ class CtrlProperties(object):
     
     def loadProperties(self, _filename):
         fle= open(_filename,'r')
-        self.property.load(fle)
-        for key in self.paramName:
-            self.propertyF[key]= str(self.propertyF.getProperty(key))
-        print self.property
-        
+        self.propertyF.load(fle)
+        for key in self.properties:
+            self.properties[key]= str(self.propertyF.getProperty(key))
+        print self.properties
+    
+    def getProperties(self):
+        '''
+        This function works after storing or loading properties into the dictionary object
+        '''
+        return self.properties.values()
     
 class PrptResources(CtrlProperties):
     '''
@@ -128,6 +133,15 @@ class PrptConfigurationOMCDY(CtrlProperties):
         self.properties['outputFormat']= _value
         print _value
 
+    def getProperties(self):
+        '''
+        This function works after storing or loading properties into the dictionary object
+        '''
+        simulate_options = ''
+        for k, v in self.properties.iteritems():
+            simulate_options = simulate_options + "," + str(k) + "=" + str(v)
+        print simulate_options
+        return simulate_options
 
 class PrptConfigurationJM(PrptConfigurationOMCDY):
     '''

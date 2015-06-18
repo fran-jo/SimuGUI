@@ -1,7 +1,6 @@
 Aquest projecte te com a dependencies els altres projetes python MEE, MAE i SE
 
 ScriptMEE
-Create properties for simulation configuration
 Insert into tab python plot with sim results
 
 ScriptMAE

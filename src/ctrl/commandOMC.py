@@ -5,16 +5,19 @@ Created on 11 apr 2014
 '''
 import shutil
 
-class CommandOMC:
+class CommandOMC(object):
     '''
-    classdocs
+    Generates the proper script commands, with the OpenModelica scripting functions, that will be used to handle
+    the simulation within OM Compiler
     '''
-
 
     def __init__(self):
         '''
         Constructor
         '''
+    def loadModelica(self):
+        return 'loadModel(Modelica)'
+        
     def loadFile(self, _absolutePath):
         strcommand = []
         strcommand.append('loadFile(')
