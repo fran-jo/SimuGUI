@@ -21,12 +21,7 @@
 		<link>
 			<name>lib/modelica_java.jar</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/IDEModel/OpenModelica/share/omc/java/modelica_java.jar</locationURI>
-		</link>
-		<link>
-			<name>lib/org.omc.graphstream.jar</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/IDEModel/OpenModelica/share/omc/java/org.omc.graphstream.jar</locationURI>
+			<location>/Users/fran_jo/PhD_CIM/PYTHON/SimuGUI/lib/modelica_java.jar</location>
 		</link>
 	</linkedResources>
 </projectDescription>

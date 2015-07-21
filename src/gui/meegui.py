@@ -3,20 +3,151 @@ Created on 10 jun 2015
 
 @author: fragom
 '''
+from java.lang import Runnable
 from javax.swing import JPanel, JFrame, JButton, JComboBox, JTextField, JProgressBar
+from javax.swing import SwingWorker, SwingUtilities
 from javax.swing import JSplitPane, JRadioButton, JLabel, ButtonGroup
 from javax.swing import JFileChooser, WindowConstants
 from javax.swing.filechooser import FileNameExtensionFilter
-from java.awt import BorderLayout, Dimension, GridLayout
+from java.awt import BorderLayout, Dimension, GridBagLayout, GridBagConstraints
+from java.awt import Cursor as awtCursor
 from java.io import File
 from ctrl.ctrlproperties import PrptResources, PrptConfigurationOMCDY, PrptConfigurationJM
 from ctrl.commandOMC import CommandOMC
 from org.openmodelica.corba import OMCProxy
+from java.beans import PropertyChangeListener
 
-class MainGUI:
-    '''
-    TODO: Create a routine to load the values from both .properties
-    '''
+class Simulation(SwingWorker):
+    
+    def __init__(self, gui):
+        self.gui = gui
+#         SwingWorker.__init__()
+        super()
+  
+    def simulateMe(self):
+        ''' TODO: execute either OMPython or OMCProxy (java) for simulation '''
+        omcscript= CommandOMC()
+        omc= OMCProxy("Simulate")
+        ''' load Modelica '''
+        comando= omcscript.loadModelica()
+        result = omc.sendExpression(comando)
+        ''' load .mo file '''
+        comando= omcscript.loadFile(self.cbMoFile.selectedItem)
+        result = omc.sendExpression(comando)
+        ''' load library '''
+        comando= omcscript.loadFile(self.cbMoLib.selectedItem)
+        result = omc.sendExpression(comando)
+        ''' get the sim options from the properties object '''
+        strmodel= []
+        strmodel.append('SmarTSLab.Models.')
+        strmodel.append(self.cbModel.selectedItem)
+        comando= omcscript.simulate(''.join(strmodel), self.config.getProperties(), False)
+        result = omc.sendExpression(comando)
+        ''' TODO: Get the result file and save it to output dir'''
+        ''' TODO: incluir rutina para guardar formato en .h5, clase addicional a PhasorMeasH5'''
+        print result.res
+        
+
+class ResourcePanel(JPanel):
+    
+    def __init__(self):
+        ''' Resources Panel '''
+#         psimures= JPanel(GridBagLayout())
+#         psimures.setSize(Dimension(500,300))
+        self.setLayout(GridBagLayout())
+#         super(self,GridBagLayout())
+        self.setSize(Dimension(500,300))
+        ''' fila 1 '''
+        label = JLabel('Resources panel')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 1
+        c.gridwidth = 4
+        c.gridx = 0
+        c.gridy = 0
+        self.add(label, c)
+        ''' fila 2 '''
+        self.dModelFile = []
+        self.cbMoFile = JComboBox(self.dModelFile)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.75
+        c.gridwidth = 3
+        c.gridx = 0
+        c.gridy = 1
+        self.add(self.cbMoFile, c)
+        bloadmodel= JButton('Load Model',actionPerformed=self.onOpenFile)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.25
+#         c.gridwidth = 1
+        c.gridx = 3
+        c.gridy = 1
+        self.add(bloadmodel, c)
+        ''' fila 3 '''
+        self.dLibFile = []
+        self.cbMoLib = JComboBox(self.dLibFile)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.75
+        c.gridwidth = 3
+        c.gridx = 0
+        c.gridy = 2
+        self.add(self.cbMoLib, c)
+        bloadlib= JButton('Load Library',actionPerformed=self.onOpenFile)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.25
+#         c.gridwidth = 1
+        c.gridx = 3
+        c.gridy = 2
+        self.add(bloadlib, c)
+        ''' fila 4 '''
+        self.dModel = []
+        self.cbModel = JComboBox(self.dModel)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.75
+        c.gridwidth = 3
+        c.gridx = 0
+        c.gridy = 3
+        self.add(self.cbModel, c)
+        bselectmodel= JButton('Select Model',actionPerformed=self.onOpenModel)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.25
+#         c.gridwidth = 1
+        c.gridx = 3
+        c.gridy = 3
+        self.add(bselectmodel, c)
+        ''' fila 5 '''
+        self.dOutPath = []
+        self.cbOutDir = JComboBox(self.dOutPath)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.75
+        c.gridwidth = 3
+        c.gridx = 0
+        c.gridy = 4
+        self.add(self.cbOutDir, c)
+        bloadoutpath= JButton('Output Path',actionPerformed=self.onOpenFolder)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.25
+#         c.gridwidth = 1
+        c.gridx = 3
+        c.gridy = 4
+        self.add(bloadoutpath, c)
+        ''' fila 6 '''
+        bsaveSource= JButton('Save Resources',actionPerformed=self.saveResources)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.75
+        c.gridwidth = 2
+        c.gridx = 1
+        c.gridy = 5
+        self.add(bsaveSource, c)
+    
     def onOpenFile(self, event):
         ''' remember to change the path'''
         chooseFile = JFileChooser()
@@ -56,30 +187,6 @@ class MainGUI:
             self.faile= chooseFile.getSelectedFile()
             self.cbOutDir.addItem(self.faile.getPath())
             self.cbOutDir.selectedItem= self.faile.getPath()
-            
-    def simulateMe(self, event):
-        ''' TODO: execute either OMPython or OMCProxy (java) for simulation '''
-        omcscript= CommandOMC()
-        omc= OMCProxy("Simulate")
-        ''' load Modelica '''
-        comando= omcscript.loadModelica()
-        result = omc.sendExpression(comando)
-        ''' load .mo file '''
-        comando= omcscript.loadFile(self.cbMoFile.selectedItem)
-        result = omc.sendExpression(comando)
-        ''' load library '''
-        comando= omcscript.loadFile(self.cbMoLib.selectedItem)
-        result = omc.sendExpression(comando)
-        ''' get the sim options from the properties object '''
-        ''' TODO: crear bien el nombre del modelo '''
-        strmodel= []
-        strmodel.append('SmarTSLab.Models.')
-        strmodel.append(self.cbModel.selectedItem)
-        comando= omcscript.simulate(''.join(strmodel), self.config.getProperties(), False)
-        result = omc.sendExpression(comando)
-        ''' TODO: Get the result file and save it to output dir'''
-        ''' TODO: incluir rutina para guardar formato en .h5, clase addicional a PhasorMeasH5'''
-        print result.res
     
     def saveResources(self,event):
         self.config= PrptResources()
@@ -96,7 +203,216 @@ class MainGUI:
         if self.radioBtnDY.isSelected():
             nomfile= './config/simParametersDY.properties'
         self.config.saveProperties(nomfile, 'Simulation resources')
+
+
+class ConfigurationPanel(JPanel, PropertyChangeListener):
     
+    def __init__(self):
+        ''' Configuration Panel '''
+#         pconfig = JPanel(GridBagLayout())
+#         pconfig.setSize(Dimension(500,300))
+        self.setLayout(GridBagLayout())
+#         super(self,GridBagLayout())
+        self.setSize(Dimension(500,300))
+        ''' fila 1 '''
+        label = JLabel('Configuration panel')
+        c1 = GridBagConstraints()
+        c1.fill = GridBagConstraints.HORIZONTAL
+        c1.weightx = 0.5
+        c1.gridwidth = 4
+        c1.gridx = 0
+        c1.gridy = 0
+        self.add(label, c1)
+        ''' fila 2 '''
+        self.radioBtnOMC = JRadioButton('OpenModelica')
+        c2 = GridBagConstraints()
+        c2.fill = GridBagConstraints.HORIZONTAL
+        c2.weightx = 0.5
+        c2.gridx = 0
+        c2.gridy = 1
+        self.add(self.radioBtnOMC, c2)
+        self.radioBtnJM = JRadioButton('JModelica')
+        c3 = GridBagConstraints()
+        c3.fill = GridBagConstraints.HORIZONTAL
+        c3.weightx = 0.5
+        c3.gridx = 1
+        c3.gridy = 1
+        self.add(self.radioBtnJM, c3)
+        self.radioBtnDY = JRadioButton('Dymola')
+        c4 = GridBagConstraints()
+        c4.fill = GridBagConstraints.HORIZONTAL
+        c4.weightx = 0.5
+        c4.gridx = 2
+        c4.gridy = 1
+        self.add(self.radioBtnDY, c4)
+        rbBtnGroup = ButtonGroup()
+        rbBtnGroup.add(self.radioBtnOMC)
+        rbBtnGroup.add(self.radioBtnJM)
+        rbBtnGroup.add(self.radioBtnDY)
+        ''' fila 2 '''
+        label = JLabel('Start time')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 0
+        c.gridy = 2
+        self.add(label, c)
+        self.txtstop= JTextField('0')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 1
+        c.gridy = 2
+        self.add(self.txtstop, c)
+        label = JLabel('Stop time')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 2
+        c.gridy = 2
+        self.add(label, c)
+        self.txtstart= JTextField('0')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 3
+        c.gridy = 2
+        self.add(self.txtstart, c)
+        ''' fila 3 '''
+        label = JLabel('Solver')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 0
+        c.gridy = 3
+        self.add(label, c)
+        self.cbsolver= JComboBox(['dassl','rkfix2'])
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 1
+        c.gridy = 3
+        self.add(self.cbsolver, c)
+        label = JLabel('Algorithm (JM)')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 2
+        c.gridy = 3
+        self.add(label, c)
+        self.cbalgorithm= JComboBox(['AssimuloAlg'])
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 3
+        c.gridy = 3
+        self.add(self.cbalgorithm, c)
+        ''' fila 4 '''
+        label = JLabel('Interval')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 0
+        c.gridy = 4
+        self.add(label, c)
+        self.txtinterval= JTextField('0')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 1
+        c.gridy = 4
+        self.add(self.txtinterval, c)
+        ''' fila 5 '''
+        label = JLabel('Tolerance')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 0
+        c.gridy = 5
+        self.add(label, c)
+        self.txttolerance= JTextField('0')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 1
+        c.gridy = 5
+        self.add(self.txttolerance, c)
+        ''' fila 6 '''
+        label = JLabel('Output format')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 0
+        c.gridy = 6
+        self.add(label, c)
+        self.cboutformat= JComboBox(['.mat','.h5','.csv'])
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 1
+        c.gridy = 6
+        self.add(self.cboutformat, c)
+        label = JLabel('Initialize (JM)')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 2
+        c.gridy = 6
+        self.add(label, c)
+        self.cbinitialize= JComboBox(['True','False'])
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridx = 3
+        c.gridy = 6
+        self.add(self.cbinitialize, c)
+        ''' fila 7 '''
+        bSaveCfg= JButton('Save Configuration', actionPerformed= self.saveConfiguration)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridwidth = 2
+        c.gridx = 0
+        c.gridy = 7
+        self.add(bSaveCfg, c)
+        self.bSimulation= JButton('Simulate', actionPerformed= self.startSimlation)
+        self.bSimulation.enabled= 0
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridwidth = 2
+        c.gridx = 2
+        c.gridy = 7
+        self.add(self.bSimulation, c)
+        ''' fila 8 '''
+        simProgress= JProgressBar(0, self.getWidth(), value=0, stringPainted=True)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridwidth = 4
+        c.gridx = 0
+        c.gridy = 8
+        self.add(simProgress, c)
+        ''' fila 9 '''
+        self.lblResult= JLabel('Simulation information')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridwidth = 4
+        c.gridx = 0
+        c.gridy = 9
+        self.add(self.lblResult, c) 
+ 
+    def startSimlation(self, event):
+        "Invoked when the user presses the start button"
+        self.startButton.enabled = False
+        self.cursor = awtCursor.getPredefinedCursor(awtCursor.WAIT_CURSOR)
+        #Instances of javax.swing.SwingWorker are not reusuable, so
+        #we create new instances as needed.
+        task = Simulation(self)
+        task.addPropertyChangeListener(self)
+        task.execute() 
+        
     def saveConfiguration(self,event):
         if self.radioBtnOMC.isSelected() or self.radioBtnDY.isSelected():
             self.config= PrptConfigurationOMCDY()
@@ -122,116 +438,40 @@ class MainGUI:
             nomfile= './config/simConfigurationJM.properties'
             self.config.saveProperties(nomfile, 'Simulation Configuration')
         self.bSimulation.enabled= 1
-  
-    def __init__(self):
-        self.open= False
-        self.panel = JPanel()
-        self.panel.setLayout(BorderLayout())
-        frame = JFrame("GUI Development ")
-        frame.setSize(800, 600)
-        frame.setLayout(BorderLayout())
-        splitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
         
-        # Create main tab panel
-        ''' OpenModelica Panel '''
-        psimures= JPanel()
-        psimures.setLayout(GridLayout(5,2))
-        psimures.setPreferredSize(Dimension(800,400))
-        simBoton1= JButton('Load Model',actionPerformed=self.onOpenFile)
-        self.dModelFile = []
-        self.cbMoFile = JComboBox(self.dModelFile)
-        simBoton2= JButton('Load Library',actionPerformed=self.onOpenFile)
-        self.dLibFile = []
-        self.cbMoLib = JComboBox(self.dLibFile)
-        simBoton3= JButton('Select Model',actionPerformed=self.onOpenModel)
-        self.dModel = []
-        self.cbModel = JComboBox(self.dModel)
-        simBoton4= JButton('Output Path',actionPerformed=self.onOpenFolder)
-        self.dOutPath = []
-        self.cbOutDir = JComboBox(self.dOutPath)
-        bsaveSource= JButton('Save Resources',actionPerformed=self.saveResources)
-        ''' adding components to the gui '''
-        psimures.add(self.cbMoFile)
-        psimures.add(simBoton1)
-        psimures.add(self.cbMoLib)
-        psimures.add(simBoton2)
-        psimures.add(self.cbModel)
-        psimures.add(simBoton3)
-        psimures.add(self.cbOutDir)
-        psimures.add(simBoton4)
-        psimures.add(bsaveSource)
-        bSaveCfg= JButton('Save Configuration', actionPerformed= self.saveConfiguration)
-        self.bSimulation= JButton('Simulate', actionPerformed= self.simulateMe)
-        self.bSimulation.enabled= 0
-        ''' panel model '''
-#         simTabPane = JTabbedPane(JTabbedPane.BOTTOM)
-        pconfig = JPanel()
-        pconfig.setLayout(GridLayout(9,4))
-        ''' Configuration Panel '''
-        self.label = JLabel('Configuration panel')
-        self.radioBtnOMC = JRadioButton('OpenModelica')
-        self.radioBtnJM = JRadioButton('JModelica')
-        self.radioBtnDY = JRadioButton('Dymola')
-        self.cbsolver= JComboBox(['dassl','rkfix2'])
-        self.cbalgorithm= JComboBox(['AssimuloAlg'])
-        self.cboutformat= JComboBox(['.mat','.h5','.csv'])
-        self.cbinitialize= JComboBox(['True','False'])
-        self.txtinterval= JTextField('0')
-        self.txttolerance= JTextField('0')
-        self.txtstart= JTextField('0')
-        self.txtstop= JTextField('0')
-        self.lblResult= JLabel('Simulation information')
-        simProgress= JProgressBar()
-        ''' adding components to the panel '''
-        pconfig.add(self.radioBtnOMC)
-        pconfig.add(self.radioBtnJM)
-        pconfig.add(self.radioBtnDY)
-        rbBtnGroup = ButtonGroup()
-        rbBtnGroup.add(self.radioBtnOMC)
-        rbBtnGroup.add(self.radioBtnJM)
-        rbBtnGroup.add(self.radioBtnDY)
-        pconfig.add(JLabel('Start time'))
-        pconfig.add(self.txtstart)
-        pconfig.add(JLabel('Stop time'))
-        pconfig.add(self.txtstop)
-        pconfig.add(JLabel('Solver'))
-        pconfig.add(self.cbsolver)
-        pconfig.add(JLabel('Algorithm (JM)'))
-        pconfig.add(self.cbalgorithm)
-        pconfig.add(JLabel('Interval'))
-        pconfig.add(self.txtinterval)
-        pconfig.add(JLabel('Tolerance'))
-        pconfig.add(self.txttolerance)
-        pconfig.add(JLabel('Output format'))
-        pconfig.add(self.cboutformat)
-        pconfig.add(JLabel('Initialize (JM)'))
-        pconfig.add(self.cbinitialize)
-        pconfig.add(bSaveCfg)
-        pconfig.add(self.bSimulation)
-        pconfig.add(self.lblResult)
-        pconfig.add(simProgress)
-        
-#         pOMC.add(pscroll.add(arbol),BorderLayout.LINE_START)
-#         simTabPane.addTab("OpenModelica", pOMC)
-#         ''' JModelica Panel '''
-#         pJM = JPanel(BorderLayout())
-#         areatext= JTextArea()
-#         areatext.alignmentX = pJM.CENTER_ALIGNMENT
-#         pJM.add(areatext, BorderLayout.CENTER)
-#         simTabPane.addTab("JModelica", pJM)
-#         ''' Dymola Panel '''
-#         pDY = JPanel(BorderLayout())
-#         areatext= JTextArea()
-#         areatext.alignmentX = pDY.CENTER_ALIGNMENT
-#         pDY.add(areatext, BorderLayout.CENTER)
-#         simTabPane.addTab("Dymola", pDY)
-        
-        # show the GUI
-        splitPane.add(psimures)
-        splitPane.add(pconfig);
-        frame.add(splitPane)
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
-        frame.setVisible(True)
-            
+###########################################################################        
+def createAndShowGUI():
+    # Create the GUI and show it. As with all GUI code, this must run
+    # on the event-dispatching thread.
+    frame = JFrame("GUI Development ")
+    frame.setSize(500, 600)
+    frame.setLayout(BorderLayout())
+    splitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
+    
+    #Create and set up the content pane.
+    psimures= ResourcePanel()
+    psimures.setOpaque(True)
+    pconfig = ConfigurationPanel()
+    pconfig.setOpaque(True)      #content panes must be opaque
+
+    # show the GUI
+    splitPane.add(psimures)
+    splitPane.add(pconfig)
+    frame.add(splitPane)
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+    frame.setVisible(True)
+ 
+###########################################################################
+class Runnable(Runnable):
+    def __init__(self, runFunction):
+        self._runFunction = runFunction
+
+
+    def run(self):
+        self._runFunction()
+
+###########################################################################         
 if __name__ == '__main__':
-    MainGUI()
+    SwingUtilities.invokeLater(Runnable(createAndShowGUI))
+    ''' TODO: load the current configuration from resources.properties and 
+    configuration.properties '''
