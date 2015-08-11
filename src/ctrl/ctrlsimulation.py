@@ -3,65 +3,151 @@ Created on 4 apr 2014
 
 @author: fragom
 '''
+from java.util import Properties
+import os
 
-class SimulationConfigOMC:
+class SimulationConfiguration(object):
     '''
-    startTime=0 
-    stopTime=0
-    numberOfIntervals=0
-    fixedStepSize=false
-    tolerance=0 
-    method=''  
-    outputFormat=''
-    '''    
-    
-    _configuration= {}
-    #_solver_config= {}
-    
-    def __init__(self, params):
+    classdocs
+    '''
+
+    def __init__(self):
         '''
         Constructor
+        params[0]: .properties file
         '''
-        fitxer= params.replace('\\','/') #name of properties file
-        readingMode= 'r'
-        # loading properties into memory
-        properti = open(fitxer, readingMode)
-        for line in properti:
-            option= line.split('=')
-            self._configuration[option[0]]= option[1][:-1]
+        self.propertyF= Properties()
+        self.properties= {'default':'property'}
+        
+    def save_Properties(self, _filename, _comment):
+        for key in self.properties:
+            self.propertyF.setProperty(key, self.properties[key])
+        fle= open(_filename,'w')
+        self.propertyF.store(fle, _comment)
+    
+    def load_Properties(self, _filename):
+        fle= open(_filename,'r')
+        self.propertyF.load(fle)
+        for key in self.properties:
+            self.properties[key]= str(self.propertyF.getProperty(key))
+        print self.properties
+    
+    def get_Properties(self):
+        '''
+        This function works after storing or loading properties into the dictionary object
+        '''
+        return self.properties.values()
 
-    def getStartTime(self):
-        return float(self._configuration['startTime'])
+class SimulationConfigOMCDY(SimulationConfiguration):
+    '''
+    classdocs
+    '''
     
-    def getStopTime(self):
-        return float(self._configuration['stopTime'])
+    def __init__(self):
+        ''' 
+        Constructor
+        '''
+        SimulationConfiguration.__init__(self)
+        self.properties= {'startTime':'','stopTime':'','numberOfIntervals':'',\
+                          'tolerance':'','method':'','outputFormat':''}
+        self.compiler= 'openmodelica'
+        
+    #
     
-    def getNumberOfIntervals(self):
-        return self._configuration['numberOfIntervals']
+    def get_starttime(self):
+        return self.properties['startTime']
     
-    def isFixedStepSize(self):
-        return int(self._configuration['fixedStepSize'])
+    def get_stoptime(self):
+        return self.properties['stopTime']
     
-    def getTolerance(self):
-        return self._configuration['tolerance']
+    def get_intervals(self):
+        return self.properties['numberOfIntervals']
     
-    def getMethod(self):
-        return self._configuration['method']
+    def get_tolerance(self):
+        return self.properties['tolerance']
     
-    def getOutputFormat(self):
-        return self._configuration['outputFormat']
+    def get_method(self):
+        return self.properties['method']
     
-    def setSimOptions(self):
-        ''' creates a command string with simulation configuration values '''
-        simulate_options = ""
-        for k, v in self._configuration.iteritems():
-#             if k in self.set_sim_options:
-#                 i = self.set_sim_options.index(k)
-#                 if v != None and v != "":
-#                     if k == "algorithmName":
-#                         v = "\"" + str(v).lower() + '\"'
-#                     elif k == "outputFormat":
-#                         v = "\"" + str(v).lower() + '\"'
-                    simulate_options = simulate_options + "," + str(k) + "=" + str(v)
-        print simulate_options
-        return simulate_options
+    def get_outputformat(self):
+        return self.properties['outputFormat']
+    #
+    
+    def set_starttime(self, _value):
+        self.properties['startTime']= _value
+        
+    def set_stoptime(self, _value):
+        self.properties['stopTime']= _value
+        
+    def set_intervals(self, _value):
+        self.properties['numberOfIntervals']= _value
+        
+    def set_tolerance(self, _value):
+        self.properties['tolerance']= _value
+       
+    def set_method(self, _value):
+        self.properties['method']= _value
+         
+    def set_outputformat(self, _value):
+        self.properties['outputFormat']= _value
+
+#     def get_Properties(self):
+#         '''
+#         This function works after storing or loading properties into the dictionary object
+#         '''
+#         simulate_options = ''
+#         for k, v in self.properties.iteritems():
+#             simulate_options = simulate_options + "," + str(k) + "=" + str(v)
+#         print simulate_options
+#         return simulate_options
+    
+class SimulationConfigJM(SimulationConfigOMCDY):
+    '''
+    classdocs
+    '''
+    
+    def __init__(self):
+        ''' 
+        Constructor
+        '''
+        SimulationConfigOMCDY.__init__(self)
+        self.properties= {'start_time':'','final_time':'','algorithm':'',\
+                          'ncp':'','solver':'','initialize':''}
+    
+    #
+    def get_starttime(self):
+        return self.properties['start_time']
+        
+    def get_stoptime(self):
+        return self.properties['final_time']
+        
+    def get_intervals(self):
+        return self.properties['ncp']
+        
+    def get_algorithm(self):
+        return self.properties['algorithm']
+       
+    def get_method(self):
+        return self.properties['solver']
+         
+    def get_initialization(self):
+        return self.properties['initialize']
+    
+    #   
+    def set_starttime(self, _value):
+        self.properties['start_time']= _value
+        
+    def set_stoptime(self, _value):
+        self.properties['final_time']= _value
+        
+    def set_intervals(self, _value):
+        self.properties['ncp']= _value
+        
+    def set_algorithm(self, _value):
+        self.properties['algorithm']= _value
+       
+    def set_method(self, _value):
+        self.properties['solver']= _value
+         
+    def set_initialization(self, _value):
+        self.properties['initialize']= _value

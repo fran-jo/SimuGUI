@@ -12,7 +12,8 @@ from javax.swing.filechooser import FileNameExtensionFilter
 from java.awt import BorderLayout, Dimension, GridBagLayout, GridBagConstraints
 from java.awt import Cursor as awtCursor
 from java.io import File
-from ctrl.ctrlproperties import PrptResources, PrptConfigurationOMCDY, PrptConfigurationJM
+from ctrl.ctrlresources import ParameterResources
+from ctrl.ctrlsimulation import SimulationConfigOMCDY, SimulationConfigJM
 from ctrl.commandOMC import CommandOMC
 from org.openmodelica.corba import OMCProxy
 from java.beans import PropertyChangeListener
@@ -25,7 +26,6 @@ class Simulation(SwingWorker):
         super()
   
     def simulateMe(self):
-        ''' TODO: execute either OMPython or OMCProxy (java) for simulation '''
         omcscript= CommandOMC()
         omc= OMCProxy("Simulate")
         ''' load Modelica '''
@@ -42,7 +42,9 @@ class Simulation(SwingWorker):
         strmodel.append('SmarTSLab.Models.')
         strmodel.append(self.cbModel.selectedItem)
         comando= omcscript.simulate(''.join(strmodel), self.config.getProperties(), False)
+        print '1) simulate ', comando
         result = omc.sendExpression(comando)
+        
         ''' TODO: Get the result file and save it to output dir'''
         ''' TODO: incluir rutina para guardar formato en .h5, clase addicional a PhasorMeasH5'''
         print result.res
@@ -142,11 +144,19 @@ class ResourcePanel(JPanel):
         bsaveSource= JButton('Save Resources',actionPerformed=self.saveResources)
         c = GridBagConstraints()
         c.fill = GridBagConstraints.HORIZONTAL
-        c.weightx = 0.75
+        c.weightx = 0.5
         c.gridwidth = 2
-        c.gridx = 1
+        c.gridx = 0
         c.gridy = 5
         self.add(bsaveSource, c)
+        bloadSource= JButton('Load Resources',actionPerformed=self.loadResources)
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 0.5
+        c.gridwidth = 2
+        c.gridx = 2
+        c.gridy = 5
+        self.add(bloadSource, c)
     
     def onOpenFile(self, event):
         ''' remember to change the path'''
@@ -154,7 +164,7 @@ class ResourcePanel(JPanel):
         chooseFile.setCurrentDirectory(File('C:\Users\fragom\PhD_CIM\Modelica\Models')) 
         filtro = FileNameExtensionFilter("mo files", ["mo"])
         chooseFile.addChoosableFileFilter(filtro)
-        ret = chooseFile.showDialog(self.panel, "Choose file")
+        ret = chooseFile.showDialog(self, "Choose file")
         if ret == JFileChooser.APPROVE_OPTION:
             self.faile= chooseFile.getSelectedFile()
             if event.getActionCommand() == "Load Model":
@@ -182,28 +192,50 @@ class ResourcePanel(JPanel):
     def onOpenFolder(self, event):
         chooseFile = JFileChooser()
         chooseFile.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        ret = chooseFile.showDialog(self.panel, "Choose folder")
+        ret = chooseFile.showDialog(self, "Choose folder")
         if ret == JFileChooser.APPROVE_OPTION:
             self.faile= chooseFile.getSelectedFile()
             self.cbOutDir.addItem(self.faile.getPath())
             self.cbOutDir.selectedItem= self.faile.getPath()
     
     def saveResources(self,event):
-        self.config= PrptResources()
-        self.config.setmodelPath(self.cbMoFile.selectedItem)
-        self.config.setmodelFile(self.cbMoFile.selectedItem)
-        self.config.setmodelName(self.cbModel.selectedItem)
-        self.config.setlibraryPath(self.cbMoLib.selectedItem)
-        self.config.setlibraryFile(self.cbMoLib.selectedItem)
-        self.config.setoutputPath(self.cbOutDir.selectedItem)
+        self.config= ParameterResources()
+        self.config.set_modelPath(self.cbMoFile.selectedItem)
+        self.config.set_modelFile(self.cbMoFile.selectedItem)
+        self.config.set_modelName(self.cbModel.selectedItem)
+        self.config.set_libraryPath(self.cbMoLib.selectedItem)
+        self.config.set_libraryFile(self.cbMoLib.selectedItem)
+        self.config.set_outputPath(self.cbOutDir.selectedItem)
         if self.radioBtnOMC.isSelected():
             nomfile= './config/simParametersOMC.properties'
         if self.radioBtnJM.isSelected():
             nomfile= './config/simParametersJM.properties'
         if self.radioBtnDY.isSelected():
             nomfile= './config/simParametersDY.properties'
-        self.config.saveProperties(nomfile, 'Simulation resources')
-
+        self.config.save_Properties(nomfile, 'Simulation resources')
+    
+    def loadResources(self,event):
+        self.config= ParameterResources()
+        cp= ConfigurationPanel()
+#         if cp.isSelectedOMC():
+#             nomfile= './config/simParametersOMC.properties'
+#         else:
+#             if cp.isSelectedJM():
+#                 nomfile= './config/simParametersJM.properties'
+#             else:
+#                 if cp.isSelectedDY():
+#                     nomfile= './config/simParametersDY.properties'
+        nomfile= './config/simParametersOMC.properties'
+        self.config.load_Properties(nomfile)
+        self.cbMoFile.addItem(self.config.get_modelFile())
+        self.cbMoFile.selectedItem= self.config.get_modelFile()
+        self.cbMoLib.addItem(self.config.get_libraryFile())
+        self.cbMoLib.selectedItem= self.config.get_libraryFile()
+        self.cbModel.addItem(self.config.get_modelName())
+        self.cbModel.selectedItem= self.config.get_modelName()
+        self.cbOutDir.addItem(self.config.get_outputPath())
+        self.cbOutDir.selectedItem= self.config.get_outputPath()
+        
 
 class ConfigurationPanel(JPanel, PropertyChangeListener):
     
@@ -257,13 +289,13 @@ class ConfigurationPanel(JPanel, PropertyChangeListener):
         c.gridx = 0
         c.gridy = 2
         self.add(label, c)
-        self.txtstop= JTextField('0')
+        self.txtstart= JTextField('0')
         c = GridBagConstraints()
         c.fill = GridBagConstraints.HORIZONTAL
         c.weightx = 0.5
         c.gridx = 1
         c.gridy = 2
-        self.add(self.txtstop, c)
+        self.add(self.txtstart, c)
         label = JLabel('Stop time')
         c = GridBagConstraints()
         c.fill = GridBagConstraints.HORIZONTAL
@@ -271,13 +303,13 @@ class ConfigurationPanel(JPanel, PropertyChangeListener):
         c.gridx = 2
         c.gridy = 2
         self.add(label, c)
-        self.txtstart= JTextField('0')
+        self.txtstop= JTextField('0')
         c = GridBagConstraints()
         c.fill = GridBagConstraints.HORIZONTAL
         c.weightx = 0.5
         c.gridx = 3
         c.gridy = 2
-        self.add(self.txtstart, c)
+        self.add(self.txtstop, c)
         ''' fila 3 '''
         label = JLabel('Solver')
         c = GridBagConstraints()
@@ -375,8 +407,7 @@ class ConfigurationPanel(JPanel, PropertyChangeListener):
         c.gridx = 0
         c.gridy = 7
         self.add(bSaveCfg, c)
-        self.bSimulation= JButton('Simulate', actionPerformed= self.startSimlation)
-        self.bSimulation.enabled= 0
+        self.bSimulation= JButton('Load Configuration', actionPerformed= self.loadConfiguration)
         c = GridBagConstraints()
         c.fill = GridBagConstraints.HORIZONTAL
         c.weightx = 0.5
@@ -385,29 +416,48 @@ class ConfigurationPanel(JPanel, PropertyChangeListener):
         c.gridy = 7
         self.add(self.bSimulation, c)
         ''' fila 8 '''
-        simProgress= JProgressBar(0, self.getWidth(), value=0, stringPainted=True)
+        self.bSimulation= JButton('Simulate', actionPerformed= self.startSimlation)
+        self.bSimulation.enabled= 0
         c = GridBagConstraints()
         c.fill = GridBagConstraints.HORIZONTAL
-        c.weightx = 0.5
+        c.weightx = 1
         c.gridwidth = 4
         c.gridx = 0
         c.gridy = 8
-        self.add(simProgress, c)
-        ''' fila 9 '''
-        self.lblResult= JLabel('Simulation information')
+        self.add(self.bSimulation, c)
+        ''' file 9 '''
+        simProgress= JProgressBar(0, self.getWidth(), value=0, stringPainted=True)
         c = GridBagConstraints()
         c.fill = GridBagConstraints.HORIZONTAL
-        c.weightx = 0.5
+        c.weightx = 1
         c.gridwidth = 4
         c.gridx = 0
         c.gridy = 9
+        self.add(simProgress, c)
+        ''' fila 10 '''
+        self.lblResult= JLabel('Simulation information')
+        c = GridBagConstraints()
+        c.fill = GridBagConstraints.HORIZONTAL
+        c.weightx = 1
+        c.gridwidth = 4
+        c.gridx = 0
+        c.gridy = 10
         self.add(self.lblResult, c) 
  
+    def isSelectedOMC(self):
+        return self.radioBtnOMC.selected
+    
+    def isSelectedJM(self):
+        return self.radioBtnJM.selected
+    
+    def isSelectedDY(self):
+        return self.radioBtnDY.selected
+    
     def startSimlation(self, event):
         "Invoked when the user presses the start button"
         self.startButton.enabled = False
         self.cursor = awtCursor.getPredefinedCursor(awtCursor.WAIT_CURSOR)
-        #Instances of javax.swing.SwingWorker are not reusuable, so
+        #Instances of javax.swing.SwingWorker are not reusable, so
         #we create new instances as needed.
         task = Simulation(self)
         task.addPropertyChangeListener(self)
@@ -415,28 +465,51 @@ class ConfigurationPanel(JPanel, PropertyChangeListener):
         
     def saveConfiguration(self,event):
         if self.radioBtnOMC.isSelected() or self.radioBtnDY.isSelected():
-            self.config= PrptConfigurationOMCDY()
-            self.config.setstarttime(self.txtstart.getText())
-            self.config.setstoptime(self.txtstop.getText())
-            self.config.settolerance(self.txttolerance.getText())
-            self.config.setintervals(self.txtinterval.getText())
-            self.config.setmethod(self.cbsolver.selectedItem)
-            self.config.setoutputformat(self.cboutformat.selectedItem)
+            self.config= SimulationConfigOMCDY()
+            self.config.set_starttime(self.txtstart.getText())
+            self.config.set_stoptime(self.txtstop.getText())
+            self.config.set_tolerance(self.txttolerance.getText())
+            self.config.set_intervals(self.txtinterval.getText())
+            self.config.set_method(self.cbsolver.selectedItem)
+            self.config.set_outputformat(self.cboutformat.selectedItem)
             if self.radioBtnOMC.isSelected():
                 nomfile= './config/simConfigurationOMC.properties'
             if self.radioBtnDY.isSelected():
                 nomfile= './config/simConfigurationDY.properties'
-            self.config.saveProperties(nomfile, 'Simulation Configuration')
+            self.config.save_Properties(nomfile, 'Simulation Configuration')
         if self.radioBtnJM.isSelected():
-            self.config= PrptConfigurationJM()
-            self.config.setstarttime(self.txtstart.getText())
-            self.config.setstoptime(self.txtstop.getText())
-            self.config.setintervals(self.txtinterval.text)
-            self.config.setmethod(self.cbsolver.selectedItem)
-            self.config.setalgorithm(self.cbalgorithm.selectedItem)
-            self.config.setinitialization(self.cbinitialize.selectedItem)
+            self.config= SimulationConfigJM()
+            self.config.set_starttime(self.txtstart.getText())
+            self.config.set_stoptime(self.txtstop.getText())
+            self.config.set_intervals(self.txtinterval.text)
+            self.config.set_method(self.cbsolver.selectedItem)
+            self.config.set_algorithm(self.cbalgorithm.selectedItem)
+            self.config.set_initialization(self.cbinitialize.selectedItem)
+            self.config.set_outputformat(self.cboutformat.selectedItem)
             nomfile= './config/simConfigurationJM.properties'
-            self.config.saveProperties(nomfile, 'Simulation Configuration')
+            self.config.save_Properties(nomfile, 'Simulation Configuration')
+        self.bSimulation.enabled= 1
+        
+    def loadConfiguration(self, event):
+        if self.radioBtnOMC.isSelected() or self.radioBtnDY.isSelected():
+            self.config= SimulationConfigOMCDY()
+            self.config.load_Properties('./config/simConfigurationOMC.properties')
+            self.txtstart.setText(self.config.get_starttime())
+            self.txtstop.setText(self.config.get_stoptime())
+            self.txttolerance.setText(self.config.get_tolerance())
+            self.txtinterval.setText(self.config.get_intervals())
+            self.cbsolver.selectedItem= self.config.get_method()
+            self.cboutformat.selectedItem= self.config.get_outputformat()
+        if self.radioBtnJM.isSelected():
+            self.config= SimulationConfigJM()
+            self.config.load_Properties('./config/simConfigurationJM.properties')
+            self.txtstart.setText(self.config.get_starttime())
+            self.txtstop.setText(self.config.get_stoptime())
+            self.txtinterval.setText(self.config.get_intervals())
+            self.cbsolver.selectedItem= self.config.get_method()
+            self.cbalgorithm.selectedItem= self.config.get_algorithm()
+            self.cbinitialize.selectedItem= self.config.get_initialization()
+#             self.cboutformat.selectedItem= self.config.get_outputformat()
         self.bSimulation.enabled= 1
         
 ###########################################################################        
