@@ -18,14 +18,14 @@ from ctrl.commandOMC import CommandOMC
 from org.openmodelica.corba import OMCProxy
 from java.beans import PropertyChangeListener
 
-class Simulation(SwingWorker):
+class SimulationTask(SwingWorker):
     
     def __init__(self, gui):
         self.gui = gui
-#         SwingWorker.__init__()
-        super()
+        SwingWorker.__init__(self)
+#         super(self)
   
-    def simulateMe(self):
+    def doInBackground(self):
         omcscript= CommandOMC()
         omc= OMCProxy("Simulate")
         ''' load Modelica '''
@@ -44,11 +44,16 @@ class Simulation(SwingWorker):
         comando= omcscript.simulate(''.join(strmodel), self.config.getProperties(), False)
         print '1) simulate ', comando
         result = omc.sendExpression(comando)
-        
+        print result.res
         ''' TODO: Get the result file and save it to output dir'''
         ''' TODO: incluir rutina para guardar formato en .h5, clase addicional a PhasorMeasH5'''
         print result.res
         
+    def process(self):
+        print 'swing worker process method'
+        
+    def done(self):
+        print 'swing worker done method'
 
 class ResourcePanel(JPanel):
     
@@ -173,7 +178,7 @@ class ResourcePanel(JPanel):
             if event.getActionCommand() == "Load Library":
                 self.cbMoLib.addItem(self.faile.getPath())
                 self.cbMoLib.selectedItem= self.faile.getPath()
-            print self.faile
+#             print self.faile
     
     def onOpenModel(self, event):
         omcscript= CommandOMC()
@@ -181,7 +186,10 @@ class ResourcePanel(JPanel):
         comando= omcscript.loadFile(self.cbMoFile.selectedItem)
         result = omc.sendExpression(comando)
         ''' TODO: Parametrizar este comando '''
-        comando= omcscript.getClassNames('SmarTSLab.Models')
+        modelname=  self.cbMoFile.selectedItem.split('\\')
+#         print modelname[-1].split('.')[0]
+        modelname= modelname[-1].split('.')[0]
+        comando= omcscript.getClassNames(modelname)
         result = omc.sendExpression(comando)
 #         print 'result OMCProxy', result.__class__.__name__
 #         print 'result.res', result.res[1:-2]
@@ -206,26 +214,12 @@ class ResourcePanel(JPanel):
         self.config.set_libraryPath(self.cbMoLib.selectedItem)
         self.config.set_libraryFile(self.cbMoLib.selectedItem)
         self.config.set_outputPath(self.cbOutDir.selectedItem)
-        if self.radioBtnOMC.isSelected():
-            nomfile= './config/simParametersOMC.properties'
-        if self.radioBtnJM.isSelected():
-            nomfile= './config/simParametersJM.properties'
-        if self.radioBtnDY.isSelected():
-            nomfile= './config/simParametersDY.properties'
+        nomfile= './config/simParameters.properties'
         self.config.save_Properties(nomfile, 'Simulation resources')
     
     def loadResources(self,event):
         self.config= ParameterResources()
-        cp= ConfigurationPanel()
-#         if cp.isSelectedOMC():
-#             nomfile= './config/simParametersOMC.properties'
-#         else:
-#             if cp.isSelectedJM():
-#                 nomfile= './config/simParametersJM.properties'
-#             else:
-#                 if cp.isSelectedDY():
-#                     nomfile= './config/simParametersDY.properties'
-        nomfile= './config/simParametersOMC.properties'
+        nomfile= './config/simParameters.properties'
         self.config.load_Properties(nomfile)
         self.cbMoFile.addItem(self.config.get_modelFile())
         self.cbMoFile.selectedItem= self.config.get_modelFile()
@@ -443,25 +437,15 @@ class ConfigurationPanel(JPanel, PropertyChangeListener):
         c.gridx = 0
         c.gridy = 10
         self.add(self.lblResult, c) 
- 
-    def isSelectedOMC(self):
-        return self.radioBtnOMC.selected
-    
-    def isSelectedJM(self):
-        return self.radioBtnJM.selected
-    
-    def isSelectedDY(self):
-        return self.radioBtnDY.selected
-    
+     
     def startSimlation(self, event):
         "Invoked when the user presses the start button"
-        self.startButton.enabled = False
-        self.cursor = awtCursor.getPredefinedCursor(awtCursor.WAIT_CURSOR)
+        self.bSimulation.enabled = False
         #Instances of javax.swing.SwingWorker are not reusable, so
         #we create new instances as needed.
-        task = Simulation(self)
-        task.addPropertyChangeListener(self)
-        task.execute() 
+        self.simtask = SimulationTask(self)
+#         self.simtask.addPropertyChangeListener(self)
+        self.simtask.execute() 
         
     def saveConfiguration(self,event):
         if self.radioBtnOMC.isSelected() or self.radioBtnDY.isSelected():

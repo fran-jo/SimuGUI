@@ -30,7 +30,7 @@ class SimulationConfiguration(object):
         self.propertyF.load(fle)
         for key in self.properties:
             self.properties[key]= str(self.propertyF.getProperty(key))
-        print self.properties
+#         print self.properties
     
     def get_Properties(self):
         '''
@@ -90,16 +90,7 @@ class SimulationConfigOMCDY(SimulationConfiguration):
          
     def set_outputformat(self, _value):
         self.properties['outputFormat']= _value
-
-#     def get_Properties(self):
-#         '''
-#         This function works after storing or loading properties into the dictionary object
-#         '''
-#         simulate_options = ''
-#         for k, v in self.properties.iteritems():
-#             simulate_options = simulate_options + "," + str(k) + "=" + str(v)
-#         print simulate_options
-#         return simulate_options
+        
     
 class SimulationConfigJM(SimulationConfigOMCDY):
     '''
