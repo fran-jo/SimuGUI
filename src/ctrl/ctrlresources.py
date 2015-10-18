@@ -60,6 +60,7 @@ class ParameterResources(SimulationResources):
     
     #
     
+    ''' get methods for getting the properties from the resource file to GUI '''
     def get_modelFile(self):
         fullfile= self.properties['modelPath']+ '/'+ self.properties['modelName']
         return fullfile
@@ -75,7 +76,7 @@ class ParameterResources(SimulationResources):
         return self.properties['outputPath']
     
     #
-          
+    ''' save mehtods to store resources from GUI to the resource file '''
     def set_modelPath(self, _modelPath):
         separateValues= _modelPath.split(os.sep)
         modelPath = '/'.join(separateValues[:-1])
