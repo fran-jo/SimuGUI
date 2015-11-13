@@ -13,8 +13,8 @@ from java.io import File
 from javax.swing.filechooser import FileNameExtensionFilter
 from java.beans import PropertyChangeListener
 from java.lang import Runnable
-from src.classes import PhasorMeasH5
-from src.data import signal
+# from src.classes import PhasorMeasH5
+# from src.data import signal
 
 class SimoutPanel(JPanel, PropertyChangeListener): 
     
