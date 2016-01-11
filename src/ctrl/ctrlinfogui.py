@@ -24,7 +24,6 @@ class StreamProperties(object):
         self.readingMode= params[1]
         self.properties= {'default':'property'}
         
-        
     def save_Properties(self):
         fle= open(self.fitxer,'w')
         for key in self.properties:

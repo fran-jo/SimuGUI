@@ -9,16 +9,12 @@
 
 from PyQt4 import QtCore, QtGui
 from OMPython import OMCSession
-import csv
 from SimulationOMC import SimulationOMC
-
- 
 #from SimulationResources import SimulationResources
 #from tstctrl import SimulationResources
 from ctrlinfogui import SimulationResources, SimulationConfigurationOMC
 from commandOMC import CommandOMC
 import sys, time 
-import ast
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
