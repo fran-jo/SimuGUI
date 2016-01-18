@@ -70,25 +70,23 @@ class SimulationResources(StreamProperties):
         self.properties= {'modelPath':'','libraryPath':'','modelFile':'',\
                           'libraryFile':'','modelName':'','outputPath':''}
     
-    #
-    
-    ''' get methods for getting the properties from the resource file to GUI '''
+    # get methods for getting the properties from the resource file to GUI
     def get_modelFile(self):
-        fullfile= self.properties['modelPath'][:-1]+ self.properties['modelFile'][:-1]
+        fullfile= self.properties['modelPath'][:-1]+ '/'+ self.properties['modelFile'][:-1]
         return fullfile
     
     def get_libraryFile(self):
-        fulllib= self.properties['libraryPath'][:-1]+ self.properties['libraryFile'][:-1]
+        fulllib= self.properties['libraryPath'][:-1]+ '/'+ self.properties['libraryFile'][:-1]
         return fulllib
     
     def get_modelName(self):
         return self.properties['modelName'][:-1]
     
     def get_outputPath(self):
+        print self.properties['outputPath'][:-1]
         return self.properties['outputPath'][:-1]
     
-    #
-    ''' save mehtods to store resources from GUI to the resource file '''
+    # save methods to store resources from GUI to the resource file 
     def set_modelPath(self, _modelPath):
 #         separateValues= _modelPath.split(os.sep)
 #         modelPath = '/'.join(separateValues[:-1])
@@ -127,7 +125,7 @@ class SimulationResources(StreamProperties):
         self.properties['outputPath']= outputPath
 
 
-class SimulationConfigurationOMC(StreamProperties):
+class SimulationConfiguration(StreamProperties):
     '''
     classdocs
     startTime='' - Start Time
@@ -143,26 +141,26 @@ class SimulationConfigurationOMC(StreamProperties):
         '''
         StreamProperties.__init__(self, params)
         self.properties= {'startTime':'','stopTime':'','numberOfIntervals':'',\
-                          'tolerance':'','method':'','outputFormat':''}
+                          'tolerance':'','solver':'','outputFormat':''}
         self.compiler= 'openmodelica'
         
     def get_starttime(self):
-        return self.properties['startTime']
+        return self.properties['startTime'][:-1]
     
     def get_stoptime(self):
-        return self.properties['stopTime']
+        return self.properties['stopTime'][:-1]
     
     def get_intervals(self):
-        return self.properties['numberOfIntervals']
+        return self.properties['numberOfIntervals'][:-1]
     
     def get_tolerance(self):
-        return self.properties['tolerance']
+        return self.properties['tolerance'][:-1]
     
-    def get_method(self):
-        return self.properties['method']
+    def get_solver(self):
+        return self.properties['solver'][:-1]
     
     def get_outputformat(self):
-        return self.properties['outputFormat']
+        return self.properties['outputFormat'][:-1]
     #
     
     def set_starttime(self, _value):
@@ -177,10 +175,60 @@ class SimulationConfigurationOMC(StreamProperties):
     def set_tolerance(self, _value):
         self.properties['tolerance']= _value
        
-    def set_method(self, _value):
-        self.properties['method']= _value
+    def set_solver(self, _value):
+        self.properties['solver']= _value
          
     def set_outputformat(self, _value):
         self.properties['outputFormat']= _value
         
     
+class SimulationConfigJM(SimulationConfiguration):
+    '''
+    classdocs
+    '''
+    
+    def __init__(self, params):
+        ''' 
+        Constructor
+        '''
+        SimulationConfiguration.__init__(self, params)
+        self.properties= {'start_time':'','final_time':'','algorithm':'',\
+                          'ncp':'','solver':'','initialize':''}
+        self.compiler= 'jmodelica'
+    #
+    def get_starttime(self):
+        return self.properties['start_time']
+        
+    def get_stoptime(self):
+        return self.properties['final_time']
+        
+    def get_intervals(self):
+        return self.properties['ncp']
+        
+    def get_algorithm(self):
+        return self.properties['algorithm']
+       
+    def get_method(self):
+        return self.properties['solver']
+         
+    def get_initialization(self):
+        return self.properties['initialize']
+    
+    #   
+    def set_starttime(self, _value):
+        self.properties['start_time']= _value
+        
+    def set_stoptime(self, _value):
+        self.properties['final_time']= _value
+        
+    def set_intervals(self, _value):
+        self.properties['ncp']= _value
+        
+    def set_algorithm(self, _value):
+        self.properties['algorithm']= _value
+       
+    def set_method(self, _value):
+        self.properties['solver']= _value
+         
+    def set_initialization(self, _value):
+        self.properties['initialize']= _value

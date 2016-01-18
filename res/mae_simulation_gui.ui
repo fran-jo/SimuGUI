@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1054</width>
+    <height>814</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>9</y>
+     <width>1051</width>
+     <height>801</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QGroupBox" name="gb_Qualitative">
+      <property name="title">
+       <string>Qualitative Analysis</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="6" column="1">
+        <widget class="QPushButton" name="pushButton_9">
+         <property name="text">
+          <string>Save Image</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QComboBox" name="cbx_signalSimList">
+         <item>
+          <property name="text">
+           <string>Item1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Item2</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="btn_loadSimulation">
+         <property name="text">
+          <string>Browse Outputs</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="MatplotlibWidget" name="mplot_simOutputs" native="true"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QComboBox" name="cbx_signalMeasList">
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item1</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QPushButton" name="btn_loadMeasurements">
+         <property name="text">
+          <string>Browse Signals</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="MatplotlibWidget" name="mplot_measurements" native="true"/>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="pushButton_8">
+         <property name="text">
+          <string>Save Image</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="gb_Quantitative">
+      <property name="title">
+       <string>Quantitative Analysis</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="btn_era">
+         <property name="text">
+          <string>ERA Method</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="MatplotlibWidget" name="mplot_validation" native="true">
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="btn_saveResults">
+         <property name="text">
+          <string>Save Results</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="btn_loadResults">
+         <property name="text">
+          <string>Load Results</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="btn_modeEst">
+         <property name="text">
+          <string>Mode Estimation</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="3">
+        <widget class="QListWidget" name="lst_report"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MatplotlibWidget</class>
+   <extends>QWidget</extends>
+   <header>matplotlibwidget</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
