@@ -128,7 +128,7 @@ class StreamH5File(object):
             
 class InputH5Stream(StreamH5File):
     '''classdocs'''
-    groupList= []
+    datasetList= []
     sampleTime= []
     magnitude= []
     angle= []
@@ -160,14 +160,20 @@ class InputH5Stream(StreamH5File):
             self.dsenyal[_component]= csenyal
             idx+= 2
                
-    def load_h5group(self):
+    def load_h5SignalGroup(self):
         self.cgroup= self.ch5file[self.ch5file.keys()[0]]
-        self.groupList= []
+        self.datasetList= []
         for name in self.cgroup:
             if (name.find("_values") != -1):
-                self.groupList.append(name)
+                self.datasetList.append(name)
+                
+    def load_h5Group(self):
+        self.cgroup= self.ch5file[self.ch5file.keys()[0]]
+        self.datasetList= []
+        for name in self.cgroup:
+                self.datasetList.append(name)
     
-    def load_h5signal(self, _name):
+    def load_h5SignalData(self, _name):
         ''' get signal data from a specific dataset '''
         self.csignal= signal.Signal()
         for x, y, z, in self.cgroup.get(_name):
@@ -179,6 +185,9 @@ class InputH5Stream(StreamH5File):
     def get_h5signal(self):
         ''' array with sampletime, magnitude and angle '''
         return self.sampleTime, self.magnitude, self.angle
+    
+    def get_h5Data(self, datasetName):
+        return self.cgroup[datasetName][:]
     
     def del_h5signal(self):
         self.sampleTime= []

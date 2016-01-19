@@ -45,8 +45,8 @@ class SimulationTask(SwingWorker):
         print '1) simulate ', comando
         result = omc.sendExpression(comando)
         print result.res
-        ''' TODO: Get the result file and save it to output dir'''
-        ''' TODO: incluir rutina para guardar formato en .h5, clase addicional a PhasorMeasH5'''
+        '''  Get the result file and save it to output dir'''
+        '''  incluir rutina para guardar formato en .h5, clase addicional a PhasorMeasH5'''
         print result.res
         
     def process(self):
@@ -185,7 +185,7 @@ class ResourcePanel(JPanel):
         omc= OMCProxy("FTP")
         comando= omcscript.loadFile(self.cbMoFile.selectedItem)
         result = omc.sendExpression(comando)
-        ''' TODO: Parametrizar este comando '''
+        ''' Parametrizar este comando '''
         modelname=  self.cbMoFile.selectedItem.split('\\')
 #         print modelname[-1].split('.')[0]
         modelname= modelname[-1].split('.')[0]
@@ -530,5 +530,5 @@ class Runnable(Runnable):
 ###########################################################################         
 if __name__ == '__main__':
     SwingUtilities.invokeLater(Runnable(createAndShowGUI))
-    ''' TODO: load the current configuration from resources.properties and 
+    ''' load the current configuration from resources.properties and 
     configuration.properties '''

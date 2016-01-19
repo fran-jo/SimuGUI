@@ -28,14 +28,6 @@ class StreamProperties(object):
         fle= open(self.fitxer,'w')
         for key in self.properties:
             fle.writelines(key+"="+str(self.properties[key])+"\n")
-            ''' TODO: write the dictionary structure to a file - Complete '''
-    def save_Properties1(self):
-        fle= open(self.fitxer,'w')
-        for key in self.properties:
-            
-#             options=key.join('=')
-#             self.properties[options[0]]=options[1]
-            fle.writelines(key+"="+self.properties[key]+"\n")
     
     def load_Properties(self):
         fle= open(self.fitxer,self.readingMode)

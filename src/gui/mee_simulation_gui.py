@@ -15,6 +15,7 @@ form_class = uic.loadUiType("./res/mee_simulation_gui.ui")[0] # Load the UI
 class SimulationGUI(QtGui.QMainWindow, form_class):
     '''
     classdocs
+    TODO: list of components and variables of the model 
     '''
     defaultsourcesFile='./config/simResources.properties'
     defaultconfigOMC='./config/simConfigurationOMC.properties'

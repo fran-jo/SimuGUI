@@ -11,6 +11,7 @@ from OMPython import OMCSession
 from ctrl.ctrlinfogui import SimulationResources
 from inout.StreamH5File import InputH5Stream
 from ctrl.validation import ValidationERA
+from mae_modeestimation import ModeEstimationGUI
    
 form_class = uic.loadUiType("./res/mae_simulation_gui.ui")[0] # Load the UI
                  
@@ -38,20 +39,19 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
     def load_signalfile(self):
         #H=H5trees('./res/matlab/IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
         #H=H5trees('IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
-        h5file= QtGui.QFileDialog.getOpenFileName(self, 'Select Simulations Outputs file')
-        self.h5tree= InputH5Stream([str(QtCore.QFileInfo(h5file).absolutePath()), str(h5file)])
+        self.h5simoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Simulations Outputs file')
+        self.h5tree= InputH5Stream([str(QtCore.QFileInfo(self.h5simoutput).absolutePath()), str(self.h5simoutput)])
         self.h5tree.open_h5()
-        self.h5tree.load_h5group()
-#         self.H.fileOpen()
-#         self.H.groupTree()
+        self.h5tree.load_h5SignalGroup()
         self.cbx_signalSimList.clear()
-        self.cbx_signalSimList.addItems(self.h5tree.groupList[:])
+        self.cbx_signalSimList.addItems(self.h5tree.datasetList[:])
+        os.chdir('C:/Users/fragom/PhD_CIM/PYTHON/SimuGUI')
         
     def plot_signal(self, index):
         ''' plot_signal '''
         self.h5tree.del_h5signal()
 #         item= self.cbx_signalSimList.currentIndex()
-        self.h5tree.load_h5signal(self.h5tree.groupList[index])
+        self.h5tree.load_h5SignalData(self.h5tree.datasetList[index])
         self.mplot_simOutputs.axes.plot(self.h5tree.sampleTime,self.h5tree.magnitude,
                                         self.h5tree.sampleTime,self.h5tree.angle)
         self.mplot_simOutputs.axes.set_title('Variables ')
@@ -95,14 +95,40 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
     def analyze_modeEstimation(self):
         ''' analyze_modeEstimation '''
         index= self.cbx_signalSimList.currentIndex()
-        os.chdir('C:/Users/fragom/PhD_CIM/PYTHON/SimuGUI/res/matlab/')
-        filefile = open('C:/Users/fragom/PhD_CIM/PYTHON/SimuGUI/res/matlab/run_mode_estimation.m', 'r')
-        line= filefile.readlines()
-        line[3]="data = h5read('C:/Users/fragom/PhD_CIM/PYTHON/SimuGUI/res/matlab/IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5','/IEEENetworks2.IEEE_9Bus/"+str(self.h5tree.groupList[index])+"');\n"
-        filefile = open('C:/Users/fragom/PhD_CIM/PYTHON/SimuGUI/res/matlab/run_mode_estimation.m', 'w')
-        filefile.writelines(line)
-        subprocess.call("matlab -r run_mode_estimation")
-        '''TODO: get the results from the resulting .h5 file, see matlab run_mode_estimation.m '''
+        ''' open dialog for mode estimation method '''
+        child_win = ModeEstimationGUI(self)
+        child_win.set_nameh5file(self.h5simoutput)
+        child_win.set_nameh5group(self.h5tree.cgroup.name)
+        child_win.set_nameh5dataset(self.h5tree.datasetList[index])
+        result = child_win.exec_()
+        if result == QtGui.QDialog.Accepted:       
+            ''' report results '''
+            self.lst_report.clear()
+            h5modest= InputH5Stream(['C:/Users/fragom/PhD_CIM/PYTHON/SimuGUI/res/matlab', 'mode_estimation.h5'])
+            h5modest.open_h5()
+            h5modest.load_h5Group()
+#             print h5modest.datasetList
+#             print h5modest.get_h5Data(h5modest.datasetList[0])
+            self.lst_report.addItem('Damping: ')
+            self.lst_report.addItem(str(h5modest.get_h5Data(h5modest.datasetList[0])))
+            self.lst_report.addItem('Frequency: ')
+            self.lst_report.addItem(str(h5modest.get_h5Data(h5modest.datasetList[1])))
+            ''' TODO: plot results, two charts: damping and frequency '''
+            self.mplot_validation.axes.subplot(2, 1, 1)
+            self.mplot_validation.axes.plot(x1,y1,'ko-')
+            self.mplot_validation.axes.set_title('Mode Estimation')
+            self.mplot_validation.axes.set_ylabel('Damping')
+            self.mplot_validation.axes.subplot(2, 1, 2)
+            self.mplot_validation.axes.plot(x2, y2, 'r.-')
+            self.mplot_validation.axes.set_ylabel('Frequency')
+            self.mplot_validation.axes.set_xlabel('time(s)')
+            self.mplot_validation.axes.grid()
+    #         ''' this line force the graph to re-draw(update) '''
+            self.mplot_validation.axes.figure.canvas.draw()
+        else:
+            self.lst_report.clear()
+            self.lst_report.addItem('Tu! Ha petat aixo!')
+
         
     def save_analysisResults(self):
         ''' TODO: save results of the era analysis '''

@@ -4,3 +4,9 @@
 
 *.pyc
 *.prefs
+*.prefs
+res/MEE_GUI.ui
+res/MAE3.ui
+src/guiqt/MAE3.py
+src/inout/H5trees.py
+res/MEE_GUI.ui

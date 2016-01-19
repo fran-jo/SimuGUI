@@ -39,7 +39,7 @@ class SimoutPanel(JPanel, PropertyChangeListener):
         # Panel for Simulation outputs
         self.setLayout(BorderLayout())
         # PAGE_START
-        ''' TODO: show group/dataset names in the list (component/variable) names '''
+        ''' show group/dataset names in the list (component/variable) names '''
         p1= JPanel()
         p1.setLayout(GridLayout(1,2))
         self.cbfilesimOut = JComboBox([])
@@ -57,7 +57,7 @@ class SimoutPanel(JPanel, PropertyChangeListener):
         p2.add(scrollPane)
         self.add(p2, BorderLayout.LINE_START)
         # CENTER
-        ''' TODO: represent a signal with matplot lib in textarea places '''
+        ''' represent a signal with matplot lib in textarea places '''
         graficSim= JTextArea()
         self.add(graficSim, BorderLayout.CENTER)
 
@@ -71,7 +71,7 @@ class MeasPanel(JPanel, PropertyChangeListener):
         # Panel for Measurements
         self.setLayout(BorderLayout())
         # PAGE_START
-        ''' TODO: show group/dataset names in the list (component/variable) names '''
+        ''' show group/dataset names in the list (component/variable) names '''
         self.cbfilemeasOut = JComboBox([])
         bfilemeasOut= JButton('Measurements', actionPerformed= self.loadMeasOut)
         p3= JPanel()
@@ -89,14 +89,14 @@ class MeasPanel(JPanel, PropertyChangeListener):
         p4.add(scrollPane)
         self.add(p4, BorderLayout.LINE_START)
         # CENTER
-        ''' TODO: represent a signal with matplot lib in textarea places '''
+        ''' represent a signal with matplot lib in textarea places '''
         graficMeas= JTextArea()
         self.add(graficMeas, BorderLayout.CENTER)
     
 class ReportPanel(JPanel, PropertyChangeListener):
       
     def modeComputation(self, event):
-        ''' TODO: invoke matlab method for mode estimation '''
+        ''' invoke matlab method for mode estimation '''
         pass 
     
     def __init__(self):
@@ -172,5 +172,5 @@ class Runnable(Runnable):
 ###########################################################################         
 if __name__ == '__main__':
     SwingUtilities.invokeLater(Runnable(createAndShowGUI))
-    ''' TODO: load the current configuration from resources.properties and 
+    ''' load the current configuration from resources.properties and 
     configuration.properties '''
