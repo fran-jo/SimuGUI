@@ -6,9 +6,9 @@ Created on Dec 13, 2015
 
 import sys
 from PyQt4 import QtGui, uic
-from ctrl.commandOMC import CommandOMC
+from inout.commandOMC import CommandOMC
 from OMPython import OMCSession
-from ctrl.ctrlinfogui import SimulationResources, SimulationConfiguration, SimulationConfigJM
+from inout.ctrlinfogui import SimulationResources, SimulationConfiguration, SimulationConfigJM
    
 form_class = uic.loadUiType("./res/mee_simulation_gui.ui")[0] # Load the UI
                  

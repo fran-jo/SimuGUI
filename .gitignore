@@ -10,3 +10,13 @@ res/MAE3.ui
 src/guiqt/MAE3.py
 src/inout/H5trees.py
 res/MEE_GUI.ui
+*.prefs
+model/buildlog.txt
+model/dsfinal.txt
+model/dsin.txt
+model/dslog.txt
+model/dymosim.lib
+model/dymosim.exp
+model/dymosim.exe
+model/dsmodel.c
+.settings/org.eclipse.core.resources.prefs

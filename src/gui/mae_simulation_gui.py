@@ -4,13 +4,13 @@ Created on Dec 13, 2015
 @author: fran_jo, ekj05
 '''
 
-import sys, os, subprocess
+import sys, os
 from PyQt4 import QtGui, uic, QtCore
-from ctrl.commandOMC import CommandOMC
+from inout.commandOMC import CommandOMC
 from OMPython import OMCSession
-from ctrl.ctrlinfogui import SimulationResources
+from inout.ctrlinfogui import SimulationResources
 from inout.StreamH5File import InputH5Stream
-from ctrl.validation import ValidationERA
+from inout.validation import ValidationERA
 from mae_modeestimation import ModeEstimationGUI
    
 form_class = uic.loadUiType("./res/mae_simulation_gui.ui")[0] # Load the UI
