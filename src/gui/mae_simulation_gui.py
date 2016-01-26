@@ -6,11 +6,11 @@ Created on Dec 13, 2015
 
 import sys, os
 from PyQt4 import QtGui, uic, QtCore
-from inout.commandOMC import CommandOMC
 from OMPython import OMCSession
-from inout.ctrlinfogui import SimulationResources
+from ctrl.ctrlinfogui import SimulationResources
 from inout.StreamH5File import InputH5Stream
-from inout.validation import ValidationERA
+from inout.StreamCSVFile import InputCSVStream
+from ctrl.validation import ValidationERA
 from mae_modeestimation import ModeEstimationGUI
    
 form_class = uic.loadUiType("./res/mae_simulation_gui.ui")[0] # Load the UI
@@ -26,17 +26,18 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         QtGui.QMainWindow.__init__(self, parent)
         self.setupUi(self)
         # data from simulations
-        self.btn_loadSimulation.clicked.connect(self.load_signalfile)
-#         self.pushButton_4.clicked.connect(self.plot_signal)
-        self.cbx_signalSimList.currentIndexChanged[int].connect(self.plot_signal)
+        self.btn_loadSimulation.clicked.connect(self.load_simulationfile)
+        self.cbx_signalSimList.currentIndexChanged[int].connect(self.plot_simulation)
         # data from measurements
+        self.btn_loadMeasurements.clicked.connect(self.load_measurementsfile)
+        self.cbx_signalMeasList.currentIndexChanged[int].connect(self.plot_measurement)
         
         # analysis of data
         self.btn_era.clicked.connect(self.analyze_eraMethod)
         self.btn_modeEst.clicked.connect(self.analyze_modeEstimation)
         self.btn_saveResults.clicked.connect(self.save_analysisResults)
          
-    def load_signalfile(self):
+    def load_simulationfile(self):
         #H=H5trees('./res/matlab/IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
         #H=H5trees('IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
         self.h5simoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Simulations Outputs file')
@@ -47,7 +48,7 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         self.cbx_signalSimList.addItems(self.h5tree.datasetList[:])
         os.chdir('C:/Users/fragom/PhD_CIM/PYTHON/SimuGUI')
         
-    def plot_signal(self, index):
+    def plot_simulation(self, index):
         ''' plot_signal '''
         self.h5tree.del_h5signal()
 #         item= self.cbx_signalSimList.currentIndex()
@@ -63,6 +64,35 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         self.mplot_simOutputs.axes.figure.canvas.draw()
         # clean memory and allow mplot object to plot new signals
 #         self.h5tree.del_h5signal()
+        self.mplot_simOutputs.axes.hold(False)
+        
+    def load_measurementsfile(self):
+        #H=H5trees('./res/matlab/IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
+        #H=H5trees('IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
+        workingdir= os.getcwd()
+        self.csvmeasoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Measurements file')
+        print self.csvmeasoutput
+        self.csvtree= InputCSVStream(str(self.csvmeasoutput), ',')
+        self.csvtree.load_csvHeader()
+        self.cbx_signalMeasList.clear()
+        self.cbx_signalMeasList.addItems(self.csvtree.get_csvHeader()[2:])
+        os.chdir(workingdir)
+        
+    def plot_measurement(self, index):
+        ''' plot_signal '''
+        self.csvtree.del_csvSignal()
+#         item= self.cbx_signalSimList.currentIndex()
+        self.csvtree.load_csvSignal(str(self.cbx_signalMeasList.currentText()))
+        self.mplot_measurements.axes.plot(self.csvtree.sampleTime,self.csvtree.signalValues)
+        print len(self.csvtree.sampleTime), len(self.csvtree.signalValues)
+        self.mplot_measurements.axes.set_title('PMU Data ')
+        self.mplot_measurements.axes.set_xlabel('Time')
+        self.mplot_measurements.axes.set_ylabel('Magnitude')
+        self.mplot_measurements.axes.grid()
+        self.mplot_measurements.axes.hold(True)
+        # this line force the graph to re-draw(update) 
+        self.mplot_simOutputs.axes.figure.canvas.draw()
+        # clean memory and allow mplot object to plot new signals
         self.mplot_simOutputs.axes.hold(False)
          
     ## Analysis of data 

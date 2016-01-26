@@ -20,3 +20,5 @@ model/dymosim.exp
 model/dymosim.exe
 model/dsmodel.c
 .settings/org.eclipse.core.resources.prefs
+
+*.csv
