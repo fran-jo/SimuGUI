@@ -25,7 +25,8 @@ class StreamCSVFile(object):
         sourceFile: .csv file path
         delimiter: delimiter of fields
         '''
-        self._csvFile= panda.read_csv(sourceFile, sep=delimiter)
+        self._sourceFile= sourceFile
+        self._delimiter= delimiter
         
     def get_fileName(self):
         return self._csvFile
@@ -35,16 +36,25 @@ class StreamCSVFile(object):
         return self._dsenyal[componame]
         
     def load_csvHeader(self):
-        self._header= list(self._csvFile.columns.values)
+        # only reading the header, remember each time to open the file
+        csvFile= panda.read_csv(self._sourceFile, sep=self._delimiter, nrows=1)
+        self._header= list(csvFile.columns.values)
         
     def get_csvHeader(self):
         return self._header
     
-    def timestamp2sample(self, measurementTime):
-        tiempos= [datetime.strptime(x,"%Y/%m/%d %H:%M:%S.%f") for x in measurementTime]
-        sampletime= [(t- tiempos[0]).microseconds/1000 for t in tiempos]
-#         print sampletime
-        return sampletime
+    def timestamp2sample(self, componame, all=True):
+        '''converts the timestamp value from pmu measurement into sample value as sample time 
+        componame name of the measurement to get the signal from 
+        '''
+        tiempos= [datetime.strptime(x,"%Y/%m/%d %H:%M:%S.%f") 
+                  for x in self._dsenyal[componame].get_sampleTime()]
+        sampletime= [(t- tiempos[0]).total_seconds() for t in tiempos]
+        self._dsenyal[componame].set_sampleTime(sampletime)
+        csenyal= signal.SignalPMU()
+        csenyal.set_signalPolar(sampletime, self._dsenyal[componame].get_signalMag(), 
+                                self._dsenyal[componame].get_signalPolar())
+        self._dsenyal[componame]= csenyal
 
     def pmu_from_cmp(self, a_instance):
         '''Given an instance of A, return a new instance of B.'''
@@ -85,37 +95,24 @@ class InputCSVStream(StreamCSVFile):
         csenyal.set_ccomponent(componame)    
         self._dsenyal[componame]= csenyal
     
-    def load_csvSignal(self, columnheader):
+    def load_csvSignal(self, columnheader, samples):
 #         senyal= signal.SignalPMU()
 #         emptyarray= [-1 for x in self._csvFile['Timestamp']]
 #         senyal.set_signalPolar(list(self._csvFile['Timestamp']), 
 #                                 list(self._csvFile[columnheader]), emptyarray)
-        self.sampleTime= self.timestamp2sample(list(self._csvFile['Timestamp']))
-        print columnheader
-        self.signalValues= list(self._csvFile[columnheader])
-        
-#     def timestamp2sample(self, componame, all=True):
-#         '''converts the timestamp value from pmu measurement into sample value as sample time 
-#         componame name of the measurement to get the signal from 
-#         '''
-#         tiempos= [datetime.strptime(x,"%Y/%m/%d %H:%M:%S.%f") 
-#                   for x in self._dsenyal[componame].get_sampleTime()]
-#         sampletime= [(t- tiempos[0]).microseconds/1000 for t in tiempos]
-#         self._dsenyal[componame].set_sampleTime(sampletime)
-#         csenyal= signal.SignalPMU()
-#         csenyal.set_signalPolar(sampletime, self._dsenyal[componame].get_signalMag(), 
-#                                 self._dsenyal[componame].get_signalPolar())
-#         self._dsenyal[componame]= csenyal
+        csvFile= panda.read_csv(self._sourceFile, sep=self._delimiter, 
+                                index_col= False, 
+                                usecols=['Timestamp', columnheader],
+                                nrows= samples)
+        self.sampleTime= self.timestamp2sample(list(csvFile['Timestamp']))
+        self.signalValues= list(csvFile[columnheader])
     
     def timestamp2sample(self, measurementTime):
         tiempos= [datetime.strptime(x,"%Y/%m/%d %H:%M:%S.%f") for x in measurementTime]
-        sampletime= [(t- tiempos[0]).microseconds/1000 for t in tiempos]
+        sampletime= [(t- tiempos[0]).total_seconds() for t in tiempos]
 #         print sampletime
         return sampletime
     
-    def get_h5signal(self):
-        ''' array with sampletime, magnitude and angle '''
-        return self.sampleTime, self.signalValues
     
     def del_csvSignal(self):
         self.sampleTime= []

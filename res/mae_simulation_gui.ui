@@ -29,13 +29,6 @@
        <string>Qualitative Analysis</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="6" column="1">
-        <widget class="QPushButton" name="pushButton_9">
-         <property name="text">
-          <string>Save Image</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QComboBox" name="cbx_signalSimList">
          <item>
@@ -60,7 +53,7 @@
        <item row="2" column="0" colspan="2">
         <widget class="MatplotlibWidget" name="mplot_simOutputs" native="true"/>
        </item>
-       <item row="4" column="0">
+       <item row="3" column="0">
         <widget class="QComboBox" name="cbx_signalMeasList">
          <item>
           <property name="text">
@@ -74,22 +67,15 @@
          </item>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="3" column="1">
         <widget class="QPushButton" name="btn_loadMeasurements">
          <property name="text">
           <string>Browse Signals</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="0" colspan="2">
+       <item row="4" column="0" colspan="2">
         <widget class="MatplotlibWidget" name="mplot_measurements" native="true"/>
-       </item>
-       <item row="3" column="1">
-        <widget class="QPushButton" name="pushButton_8">
-         <property name="text">
-          <string>Save Image</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
@@ -137,6 +123,13 @@
        </item>
        <item row="1" column="0" colspan="3">
         <widget class="QListWidget" name="lst_report"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="btn_rmse">
+         <property name="text">
+          <string>RMSE</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

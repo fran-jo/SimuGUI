@@ -11,6 +11,7 @@ from ctrl.ctrlinfogui import SimulationResources
 from inout.StreamH5File import InputH5Stream
 from inout.StreamCSVFile import InputCSVStream
 from ctrl.validation import ValidationERA
+from ctrl.analysis import QuantitativeAnalysis
 from mae_modeestimation import ModeEstimationGUI
    
 form_class = uic.loadUiType("./res/mae_simulation_gui.ui")[0] # Load the UI
@@ -27,73 +28,76 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         self.setupUi(self)
         # data from simulations
         self.btn_loadSimulation.clicked.connect(self.load_simulationfile)
-        self.cbx_signalSimList.currentIndexChanged[int].connect(self.plot_simulation)
+        self.cbx_signalSimList.activated[int].connect(self.plot_simulation)
         # data from measurements
         self.btn_loadMeasurements.clicked.connect(self.load_measurementsfile)
-        self.cbx_signalMeasList.currentIndexChanged[int].connect(self.plot_measurement)
-        
+        self.cbx_signalMeasList.activated['QString'].connect(self.plot_measurement)
         # analysis of data
         self.btn_era.clicked.connect(self.analyze_eraMethod)
         self.btn_modeEst.clicked.connect(self.analyze_modeEstimation)
         self.btn_saveResults.clicked.connect(self.save_analysisResults)
+        self.btn_rmse.clicked.connect(self.analyze_RMSE)
          
+    def changeIndex(self):
+        index = self.cbx_signalMeasList.currentIndex()
+        if index < self.cbx_signalMeasList.count() - 1:
+            self.cbx_signalMeasList.setCurrentIndex(index + 1)
+        else:
+            self.cbx_signalMeasList.setCurrentIndex(0)
+
     def load_simulationfile(self):
         #H=H5trees('./res/matlab/IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
         #H=H5trees('IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
+        workingdir= os.getcwd()
         self.h5simoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Simulations Outputs file')
         self.h5tree= InputH5Stream([str(QtCore.QFileInfo(self.h5simoutput).absolutePath()), str(self.h5simoutput)])
         self.h5tree.open_h5()
         self.h5tree.load_h5SignalGroup()
         self.cbx_signalSimList.clear()
         self.cbx_signalSimList.addItems(self.h5tree.datasetList[:])
-        os.chdir('C:/Users/fragom/PhD_CIM/PYTHON/SimuGUI')
+        os.chdir(workingdir)
         
     def plot_simulation(self, index):
         ''' plot_signal '''
         self.h5tree.del_h5signal()
-#         item= self.cbx_signalSimList.currentIndex()
         self.h5tree.load_h5SignalData(self.h5tree.datasetList[index])
         self.mplot_simOutputs.axes.plot(self.h5tree.sampleTime,self.h5tree.magnitude,
                                         self.h5tree.sampleTime,self.h5tree.angle)
+        print self.h5tree.sampleTime
         self.mplot_simOutputs.axes.set_title('Variables ')
-        self.mplot_simOutputs.axes.set_xlabel('Time')
+        self.mplot_simOutputs.axes.set_xlabel('Time (s)')
         self.mplot_simOutputs.axes.set_ylabel('Mgnitude')
         self.mplot_simOutputs.axes.grid()
         self.mplot_simOutputs.axes.hold(True)
         # this line force the graph to re-draw(update) 
         self.mplot_simOutputs.axes.figure.canvas.draw()
         # clean memory and allow mplot object to plot new signals
-#         self.h5tree.del_h5signal()
         self.mplot_simOutputs.axes.hold(False)
         
     def load_measurementsfile(self):
-        #H=H5trees('./res/matlab/IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
-        #H=H5trees('IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
         workingdir= os.getcwd()
         self.csvmeasoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Measurements file')
-        print self.csvmeasoutput
         self.csvtree= InputCSVStream(str(self.csvmeasoutput), ',')
         self.csvtree.load_csvHeader()
         self.cbx_signalMeasList.clear()
-        self.cbx_signalMeasList.addItems(self.csvtree.get_csvHeader()[2:])
+        self.cbx_signalMeasList.addItems(self.csvtree.get_csvHeader()[1:])
         os.chdir(workingdir)
         
-    def plot_measurement(self, index):
-        ''' plot_signal '''
+    def plot_measurement(self, text):
+        ''' plot_signal ''' 
         self.csvtree.del_csvSignal()
-#         item= self.cbx_signalSimList.currentIndex()
-        self.csvtree.load_csvSignal(str(self.cbx_signalMeasList.currentText()))
+        self.csvtree.load_csvSignal(str(text), 510)
         self.mplot_measurements.axes.plot(self.csvtree.sampleTime,self.csvtree.signalValues)
-        print len(self.csvtree.sampleTime), len(self.csvtree.signalValues)
+        print self.csvtree.sampleTime
         self.mplot_measurements.axes.set_title('PMU Data ')
-        self.mplot_measurements.axes.set_xlabel('Time')
+        self.mplot_measurements.axes.set_xlabel('Time (s)')
         self.mplot_measurements.axes.set_ylabel('Magnitude')
         self.mplot_measurements.axes.grid()
         self.mplot_measurements.axes.hold(True)
         # this line force the graph to re-draw(update) 
-        self.mplot_simOutputs.axes.figure.canvas.draw()
+        self.mplot_measurements.axes.figure.canvas.draw()
         # clean memory and allow mplot object to plot new signals
-        self.mplot_simOutputs.axes.hold(False)
+        self.mplot_measurements.axes.hold(False)
          
     ## Analysis of data 
     def analyze_eraMethod(self):
@@ -159,7 +163,22 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
             self.lst_report.clear()
             self.lst_report.addItem('Tu! Ha petat aixo!')
 
-        
+    def analyze_RMSE(self):
+        qa= QuantitativeAnalysis([self.h5tree.magnitude, self.csvtree.signalValues])
+        # analysis results to report 
+        arrayRMSE= qa.qaRMSE()
+        self.lst_report.addItem("MSE= "+ str(arrayRMSE[0]))
+        self.lst_report.addItem("RMSE= "+ str(arrayRMSE[1]))
+        # analysis results to plot  
+        signalError= qa.qaSignalError()
+        self.mplot_validation.axes.plot(self.csvtree.sampleTime, signalError, 'r-')
+        self.mplot_validation.axes.set_title('Error')
+        self.mplot_validation.axes.set_ylabel('Time (s)')
+        self.mplot_validation.axes.set_xlabel('Value')
+        self.mplot_validation.axes.grid()
+#         ''' this line force the graph to re-draw(update) '''
+        self.mplot_validation.axes.figure.canvas.draw()
+      
     def save_analysisResults(self):
         ''' TODO: save results of the era analysis '''
         # group, name of the analysis
