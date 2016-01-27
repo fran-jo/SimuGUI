@@ -7,12 +7,14 @@ Created on Dec 13, 2015
 import sys, os
 from PyQt4 import QtGui, uic, QtCore
 from OMPython import OMCSession
-from ctrl.ctrlinfogui import SimulationResources
+import psspy
+import dyntools
 from inout.StreamH5File import InputH5Stream
 from inout.StreamCSVFile import InputCSVStream
 from ctrl.validation import ValidationERA
 from ctrl.analysis import QuantitativeAnalysis
 from mae_modeestimation import ModeEstimationGUI
+from inout.StreamOUTFile import InputOUTStream
    
 form_class = uic.loadUiType("./res/mae_simulation_gui.ui")[0] # Load the UI
                  
@@ -38,13 +40,12 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         self.btn_saveResults.clicked.connect(self.save_analysisResults)
         self.btn_rmse.clicked.connect(self.analyze_RMSE)
          
-    def changeIndex(self):
-        index = self.cbx_signalMeasList.currentIndex()
-        if index < self.cbx_signalMeasList.count() - 1:
-            self.cbx_signalMeasList.setCurrentIndex(index + 1)
-        else:
-            self.cbx_signalMeasList.setCurrentIndex(0)
-
+    
+    def __file_extension__(self, namefile):
+        onlyname= namefile.split('/')[-1]
+        extension= onlyname.split('.')[-1]
+        return extension
+        
     def load_simulationfile(self):
         #H=H5trees('./res/matlab/IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
         #H=H5trees('IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
@@ -76,20 +77,31 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         
     def load_measurementsfile(self):
         workingdir= os.getcwd()
-        self.csvmeasoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Measurements file')
-        self.csvtree= InputCSVStream(str(self.csvmeasoutput), ',')
-        self.csvtree.load_csvHeader()
+        self.measoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Measurements file')
+        self.extension= self.__file_extension__(str(self.measoutput))
         self.cbx_signalMeasList.clear()
-        self.cbx_signalMeasList.addItems(self.csvtree.get_csvHeader()[1:])
+        if self.extension == 'csv':
+            self.csvtree= InputCSVStream(str(self.measoutput), ',')
+            self.csvtree.load_csvHeader()
+            self.cbx_signalMeasList.addItems(self.csvtree.get_csvHeader()[1:])
+        if self.extension == 'out':
+            self.pssetree = InputOUTStream(self.measoutput)
+            self.pssetree.load_channels()
+            self.cbx_signalMeasList.addItems(self.pssetree.channels)
         os.chdir(workingdir)
         
     def plot_measurement(self, text):
         ''' plot_signal ''' 
-        self.csvtree.del_csvSignal()
-        self.csvtree.load_csvSignal(str(text), 510)
-        self.mplot_measurements.axes.plot(self.csvtree.sampleTime,self.csvtree.signalValues)
-        print self.csvtree.sampleTime
-        self.mplot_measurements.axes.set_title('PMU Data ')
+        if self.extension == 'csv':
+            self.csvtree.del_csvSignal()
+            self.csvtree.load_csvSignal(str(text), 510)
+            self.mplot_measurements.axes.plot(self.csvtree.sampleTime, self.csvtree.signalValues)
+        if self.extension == 'out':
+            self.pssetree.sampleTime= self.pssetree.channel_data= []
+            self.pssetree.load_channel_data(text)
+            self.mplot_measurements.axes.plot(self.pssetree.sampleTime, self.pssetree.channel_data)
+#         print self.csvtree.sampleTime
+        self.mplot_measurements.axes.set_title('Reference data')
         self.mplot_measurements.axes.set_xlabel('Time (s)')
         self.mplot_measurements.axes.set_ylabel('Magnitude')
         self.mplot_measurements.axes.grid()
@@ -164,7 +176,10 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
             self.lst_report.addItem('Tu! Ha petat aixo!')
 
     def analyze_RMSE(self):
-        qa= QuantitativeAnalysis([self.h5tree.magnitude, self.csvtree.signalValues])
+        if self.extension == 'csv':
+            qa= QuantitativeAnalysis([self.h5tree.magnitude, self.csvtree.signalValues])
+        if self.extension == 'out':
+            qa= QuantitativeAnalysis([self.h5tree.magnitude, self.pssetree.channel_data])
         # analysis results to report 
         arrayRMSE= qa.qaRMSE()
         self.lst_report.addItem("MSE= "+ str(arrayRMSE[0]))
@@ -190,6 +205,11 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
     
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
+    # include PSSE 
+    PSSE_PATH= r'C:\\Program Files (x86)\\PTI\\PSSE33\\PSSBIN'
+    sys.path.append(PSSE_PATH)
+    os.environ['PATH']+= ';'+ PSSE_PATH
+    # creating window
     myWindow = AnalysiGUI(None)
     myWindow.show()
     app.exec_()
