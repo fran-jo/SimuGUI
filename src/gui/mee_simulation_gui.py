@@ -6,9 +6,9 @@ Created on Dec 13, 2015
 
 import sys
 from PyQt4 import QtGui, uic
-from inout.commandOMC import CommandOMC
+from ctrl.commandOMC import CommandOMC
 from OMPython import OMCSession
-from inout.ctrlinfogui import SimulationResources, SimulationConfiguration, SimulationConfigJM
+from ctrl.ctrlinfogui import SimulationResources, SimulationConfiguration, SimulationConfigJM
    
 form_class = uic.loadUiType("./res/mee_simulation_gui.ui")[0] # Load the UI
                  
@@ -46,6 +46,7 @@ class SimulationGUI(QtGui.QMainWindow, form_class):
         self.rbt_dy.clicked.connect(self.choose_compiler_selected)
         self.rbt_jm.clicked.connect(self.choose_compiler_selected)
         self.rbt_omc.clicked.connect(self.choose_compiler_selected)
+        self.btn_simulate.clicked.connect(self.simulate_model)
         ''' save/load configuration '''
         self.btn_saveConfig.clicked.connect(self.btn_saveConfig_clicked)
         self.btn_loadConfig.clicked.connect(self.btn_loadConfig_clicked)
@@ -128,6 +129,9 @@ class SimulationGUI(QtGui.QMainWindow, form_class):
             self.cbx_jmAlgorithm.setEnabled(True)
             self.cbx_jmInit.setEnabled(True)
             
+    ### simulation 
+    def simulate_model(self):
+        pass
     ### save/load configuration
     def btn_loadConfig_clicked(self):
         if self.rbt_dy.isChecked():
