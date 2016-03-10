@@ -35,12 +35,20 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         self.btn_loadMeasurements.clicked.connect(self.load_measurementsfile)
         self.cbx_signalMeasList.activated['QString'].connect(self.plot_measurement)
         # analysis of data
-        self.btn_era.clicked.connect(self.analyze_eraMethod)
-        self.btn_modeEst.clicked.connect(self.analyze_modeEstimation)
+        self.btn_analysis.clicked.connect(self.analysisOfResults)
+#         self.btn_era.clicked.connect(self.analyze_eraMethod)
+#         self.btn_modeEst.clicked.connect(self.analyze_modeEstimation)
         self.btn_saveResults.clicked.connect(self.save_analysisResults)
-        self.btn_rmse.clicked.connect(self.analyze_RMSE)
+#         self.btn_rmse.clicked.connect(self.analyze_RMSE)
          
-    
+    def analysisOfResults(self):
+        if (self.rbt_era.isChecked()):
+            self.analyze_eraMethod()
+        if (self.rbt_modeEstimation.isChecked()):
+            self.analyze_modeEstimation()
+        if (self.rbt_rmse.isChecked()):
+            self.analyze_RMSE()
+            
     def __file_extension__(self, namefile):
         onlyname= namefile.split('/')[-1]
         extension= onlyname.split('.')[-1]
@@ -50,8 +58,8 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         #H=H5trees('./res/matlab/IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
         #H=H5trees('IEEENetworks2.IEEE_9Bus_&dymola_new_Enam.h5')
         workingdir= os.getcwd()
-        self.h5simoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Simulations Outputs file')
-        self.h5tree= InputH5Stream([str(QtCore.QFileInfo(self.h5simoutput).absolutePath()), str(self.h5simoutput)])
+        h5simoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Simulations Outputs file')
+        self.h5tree= InputH5Stream([str(QtCore.QFileInfo(h5simoutput).absolutePath()), str(h5simoutput)])
         self.h5tree.open_h5()
         self.h5tree.load_h5SignalGroup()
         self.cbx_signalSimList.clear()
@@ -64,7 +72,7 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         self.h5tree.load_h5SignalData(self.h5tree.datasetList[index])
         self.mplot_simOutputs.axes.plot(self.h5tree.sampleTime,self.h5tree.magnitude,
                                         self.h5tree.sampleTime,self.h5tree.angle)
-        print self.h5tree.sampleTime
+#         print self.h5tree.sampleTime
         self.mplot_simOutputs.axes.set_title('Variables ')
         self.mplot_simOutputs.axes.set_xlabel('Time (s)')
         self.mplot_simOutputs.axes.set_ylabel('Mgnitude')
@@ -77,17 +85,25 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
         
     def load_measurementsfile(self):
         workingdir= os.getcwd()
-        self.measoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Measurements file')
-        self.extension= self.__file_extension__(str(self.measoutput))
+        measoutput= QtGui.QFileDialog.getOpenFileName(self, 'Select Measurements file')
+        self.extension= self.__file_extension__(str(measoutput))
         self.cbx_signalMeasList.clear()
         if self.extension == 'csv':
-            self.csvtree= InputCSVStream(str(self.measoutput), ',')
+            self.csvtree= InputCSVStream(str(measoutput), ',')
             self.csvtree.load_csvHeader()
+            self.cbx_signalMeasList.clear()
             self.cbx_signalMeasList.addItems(self.csvtree.get_csvHeader()[1:])
         if self.extension == 'out':
-            self.pssetree = InputOUTStream(self.measoutput)
+            self.pssetree = InputOUTStream(measoutput)
             self.pssetree.load_channels()
+            self.cbx_signalMeasList.clear()
             self.cbx_signalMeasList.addItems(self.pssetree.channels)
+        if self.extension == 'h5':
+            self.h5treeRef= InputH5Stream([str(QtCore.QFileInfo(measoutput).absolutePath()), str(measoutput)])
+            self.h5treeRef.open_h5()
+            self.h5treeRef.load_h5SignalGroup()
+            self.cbx_signalMeasList.clear()
+            self.cbx_signalMeasList.addItems(self.h5treeRef.datasetList[:])
         os.chdir(workingdir)
         
     def plot_measurement(self, text):
@@ -100,6 +116,11 @@ class AnalysiGUI(QtGui.QMainWindow, form_class):
             self.pssetree.sampleTime= self.pssetree.channel_data= []
             self.pssetree.load_channel_data(text)
             self.mplot_measurements.axes.plot(self.pssetree.sampleTime, self.pssetree.channel_data)
+        if self.extension == 'h5':
+            self.h5treeRef.del_h5signal()
+            self.h5treeRef.load_h5SignalData(self.h5treeRef.datasetList[str(text)])
+            self.mplot_simOutputs.axes.plot(self.h5treeRef.sampleTime,self.h5treeRef.magnitude,
+                                        self.h5treeRef.sampleTime,self.h5treeRef.angle)
 #         print self.csvtree.sampleTime
         self.mplot_measurements.axes.set_title('Reference data')
         self.mplot_measurements.axes.set_xlabel('Time (s)')

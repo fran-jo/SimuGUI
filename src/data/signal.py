@@ -11,18 +11,23 @@ class Signal(object):
     classdocs, clase base trabaja con complejos
     '''
     
+    _samples= 0
+    _signal = []
+    _component= ''
+        
     def __init__(self):
         '''
         Constructor
         '''
-        self._samples= 0
-        self._signal = []
-        self._component= ''
 
     def get_samples(self):
         ''' return the number of samples of the singal '''
         return self._samples
 
+    def set_samples(self, _value):
+        ''' _value: input sample/time array '''
+        self._samples = len(_value)
+        
     def get_signal(self):
         ''' return the signal in rectangular form '''
         return self._signal
@@ -41,42 +46,35 @@ class Signal(object):
             series.append(r)
         return series    
         
-    def get_signalImag(self):
+    def get_signalImaginary(self):
         ''' returns an array with imaginary component of the signal '''
         series= []
         for s,r,i in self._signal:
             series.append(i)
         return series    
 
-    def get_ccomponent(self):
+    def get_component(self):
         ''' returns the name of the component which the signal belongs to '''
         return self._component  
 
-
-    def set_csamples(self, _value):
-        ''' _value: input sample/time array '''
-        self._samples = len(_value)
-      
-    def set_signalRect(self, _samples, _valueR, _valueI):
+    def set_signal(self, samples, valueR, valueI):
         ''' create dictionary with real part of the complex signal
         _samples:
         _valueR: '''
-        self._signal= [(s,r,i) for s,r,i in zip(_samples, _valueR, _valueI)]
+        self._signal= [(s,r,i) for s,r,i in zip(samples, valueR, valueI)]
         self._samples= len(self._signal)
 
-
-    def set_ccomponent(self, value):
+    def set_component(self, value):
         ''' set the name of the component which the signal belongs to '''
         self._component = value
 
-
-    def del_csamples(self):
+    def del_samples(self):
         del self._samples
 
     def del_signal(self):
         del self._signal
 
-    def del_ccomponent(self):
+    def del_component(self):
         del self._component
 
     def __str__(self):
@@ -86,8 +84,6 @@ class Signal(object):
     def __repr__(self):
         return self.__str__()
         
-from math import sqrt
-from numpy import arctan2, abs, sin, cos
 
 class SignalPMU(Signal):
     '''
@@ -116,22 +112,9 @@ class SignalPMU(Signal):
             series.append(p)
         return series    
     
-    
     def set_signalPolar(self, sampletime, value_mag, value_ph):
         ''' create dictionary with real part of the complex signal
         _samples:
         _valueR: '''
         self._signal= zip(sampletime, value_mag, value_ph)
         self._samples= len(self._signal)
-
-
-    def del_signal(self):
-        del self._signal
-        
-
-    def complex2Polar(self):
-        pass
-    
-    def polar2Complex(self):
-        pass    
-    
