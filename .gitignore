@@ -22,3 +22,5 @@ model/dsmodel.c
 .settings/org.eclipse.core.resources.prefs
 
 *.csv
+*.mat
+*.out
