@@ -43,7 +43,7 @@ class SimulationDY():
         
     def simulate(self):
         ''' TODO: LOG all command dymola '''
-        tic= timeit.default_timer()
+#         tic= timeit.default_timer()
         ''' add library path to MODELICAPATH, to recognize folder where library is available '''
         os.environ["MODELICAPATH"] = self.libPath
         ''' Change path to model folder '''
@@ -60,9 +60,8 @@ class SimulationDY():
         s.showProgressBar(False)
     #     s.printModelAndTime()
         s.simulate()
-        toc= timeit.default_timer()
-        print 'Simulation time ', toc- tic
-        '''TODO: study the units of elapsed time '''
+#         toc= timeit.default_timer()
+#         print 'Simulation time ', toc- tic
     
     def saveOutputs(self):
         resultmat= self.moModel.split('.')[-1]
