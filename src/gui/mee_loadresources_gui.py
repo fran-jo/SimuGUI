@@ -5,7 +5,7 @@ Created on Dec 13, 2015
 '''
 
 from PyQt4 import QtGui, uic
-from ctrl.ctrlresources import SimulationResources
+from ctrlresources import SimulationResources
    
 form_sources = uic.loadUiType("./res/mee_loadsources.ui")[0] # Load the UI
                  

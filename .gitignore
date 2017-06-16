@@ -24,3 +24,7 @@ model/dsmodel.c
 *.csv
 *.mat
 *.out
+
+\.idea/inspectionProfiles/
+
+\.idea/
