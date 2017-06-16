@@ -3,21 +3,20 @@ Created on Dec 13, 2015
 
 @author: fran_jo
 '''
-
 from PyQt4 import QtGui, uic
-from ctrlresources import SimulationResources
+from ctrl.ctrlresources import SimulationResources
    
-form_sources = uic.loadUiType("./res/mee_loadsources.ui")[0] # Load the UI
+form_gui = uic.loadUiType("./res/mee_loadsources_gui.ui")[0] # Load the UI
                  
-class UI_LoadSources(QtGui.QDialog, form_sources):
+class UI_LoadSources(QtGui.QDialog, form_gui):
     '''
     classdocs
     '''
     defaultsourcesFile='./config/simResources.properties'
     modellist=[]
     
-    def __init__(self):
-        super(self.__class__, self).__init__()
+    def __init__(self, parent= None):
+        QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         ''' select resources for simulation '''
         self.simsource= SimulationResources([self.defaultsourcesFile,'r+'])
@@ -52,24 +51,6 @@ class UI_LoadSources(QtGui.QDialog, form_sources):
                 self.txtOutputFolder.setText(carpetaName)
             else:
                 self.txtOutputFolder.setText('No file selected!')
-            
-#     def btn_loadModel_clicked(self):
-#         OMPython = OMCSession()
-#         command= CommandOMC()
-#         OMPython.execute(command.loadModelica())
-#         OMPython.execute(command.loadFile(str(self.txt_modelFile.text())))
-#         filetouse= str(self.txt_modelFile.text()).split('/')
-#         modeltouse= filetouse[-1].split('.')[0]
-# #         print filetouse
-# #         print modeltouse
-#         modelNames=OMPython.execute(command.getClassNames(modeltouse))
-# #         print modelNames['SET1']['Set1']
-#         fle= open('dict1.properties','w')
-#         for x in range(len(modelNames['SET1']['Set1'])):
-#             self.modellist.append(modelNames['SET1']['Set1'][x])
-#             fle.writelines(str(modelNames['SET1']['Set1'][x]+'\n'))
-#             # add modellist to combobox
-#             self.cbx_modelList.addItem(modelNames['SET1']['Set1'][x])
     
     ### save/load resources
     def btn_loadResources_clicked(self):
@@ -90,10 +71,4 @@ class UI_LoadSources(QtGui.QDialog, form_sources):
         self.simsource.libraryfolder= str(self.txtLibraryFolder.text())
         self.simsource.outputfolder= str(self.txtOutputFolder.text())
         self.simsource.save_Properties()  
-         
-    
-# if __name__ == '__main__':
-#     app = QtGui.QApplication(sys.argv)
-#     myWindow = SimulationGUI(None)
-#     myWindow.show()
-#     app.exec_()
+        

@@ -66,7 +66,13 @@ class SimulationResources(StreamProperties):
         self.properties= {'cimPath':'','modelPath':'','libraryPath':'','modelFile':'',\
                           'libraryFile':'','modelName':'','outputPath':''}
     
-    
+    def load_Properties(self):
+        StreamProperties.load_Properties(self)
+        self.__cimfolder = self.properties['cimPath']
+        self.__modelfolder= self.properties['modelPath']
+        self.__libraryfolder= self.properties['libraryPath']
+        self.__outputfolder= self.properties['outputPath']
+        
     ''' getter/setter methods with properties '''
     @property
     def cimfolder(self):
@@ -113,9 +119,7 @@ class SimulationResources(StreamProperties):
         self.properties['modelName']= path
         self.__modelname= path;
     
-    #
-    ''' save mehtods to store resources from GUI to the resource file '''
-        
+    #    
         
     def set_modelFile(self, _filename):
         separateValues= _filename.split(os.sep)
