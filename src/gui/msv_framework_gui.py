@@ -18,19 +18,23 @@ form_plot = uic.loadUiType("./res/msv_plot_gui.ui")[0] # Load the UI
 # class UI_LoadSources(QtGui.QDialog, form_sources):
 #     def __init__(self, parent= None):
 #         QtGui.QDialog.__init__(self)
-        
+
+
 class UI_ConfigSolvers(QtGui.QDialog, form_confSolver):
     def __init__(self, parent= None):
         QtGui.QDialog.__init__(self)
-        
+
+
 class UI_Simulation(QtGui.QDialog, form_simulate):
     def __init__(self, parent= None):
         QtGui.QDialog.__init__(self)
-        
+
+
 class UI_Plot(QtGui.QDialog, form_plot):
     def __init__(self, parent= None):
         QtGui.QDialog.__init__(self)
-        
+
+
 class MVSGUI(QtGui.QMainWindow, main_form):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
