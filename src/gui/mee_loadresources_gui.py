@@ -19,7 +19,7 @@ class UI_LoadSources(QtGui.QDialog, form_gui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         ''' select resources for simulation '''
-        self.simsource= SimulationResources([self.defaultsourcesFile,'r+'])
+        self.__simsource= SimulationResources([self.defaultsourcesFile,'r+'])
         self.btnCIMFolder.clicked.connect(lambda: self.load_folderPath(1))
         self.btnModelFolder.clicked.connect(lambda: self.load_folderPath(2)) 
         self.btnLibraryFolder.clicked.connect(lambda: self.load_folderPath(3))  
@@ -55,20 +55,27 @@ class UI_LoadSources(QtGui.QDialog, form_gui):
     ### save/load resources
     def btn_loadResources_clicked(self):
         sourcesFile = QtGui.QFileDialog.getOpenFileName(self, 'Select Resources properties')
-        self.simsource= SimulationResources([sourcesFile,'r+'])
-        self.simsource.load_Properties()
-        self.txtCIMFolder.setText(self.simsource.cimfolder)
-        self.txtModelsFolder.setText(self.simsource.modelfolder)
-        self.txtLibraryFolder.setText(self.simsource.libraryfolder)
-        self.txtOutputFolder.setText(self.simsource.outputfolder)
+        self.__simsource= SimulationResources([sourcesFile,'r+'])
+        self.__simsource.load_Properties()
+        self.txtCIMFolder.setText(self.__simsource.cimFolder)
+        self.txtModelsFolder.setText(self.__simsource.modelFolder)
+        self.txtLibraryFolder.setText(self.__simsource.libraryFolder)
+        self.txtOutputFolder.setText(self.__simsource.outputFolder)
         
     def btn_saveResources_clicked(self): 
 #         sourcesFile = QtGui.QFileDialog.getOpenFileName(self, 'Select Resources properties')
-#         self.simsource= SimulationResources([sourcesFile,'w'])
+#         self.__simsource= SimulationResources([sourcesFile,'w'])
         ''' processing absolute path of .mo file into path and file '''
-        self.simsource.cimfolder= str(self.txtCIMFolder.text())
-        self.simsource.modelfolder= str(self.txtModelsFolder.text())
-        self.simsource.libraryfolder= str(self.txtLibraryFolder.text())
-        self.simsource.outputfolder= str(self.txtOutputFolder.text())
-        self.simsource.save_Properties()  
+        self.__simsource.cimFolder= str(self.txtCIMFolder.text())
+        self.__simsource.modelFolder= str(self.txtModelsFolder.text())
+        self.__simsource.libraryFolder= str(self.txtLibraryFolder.text())
+        self.__simsource.outputFolder= str(self.txtOutputFolder.text())
+        self.__simsource.modelFile= ''
+        self.__simsource.modelName= ''
+        self.__simsource.libraryFile= ''
+        self.__simsource.save_Properties()  
+        
+    @property
+    def simulationResources(self):
+        return self.__simsource
         

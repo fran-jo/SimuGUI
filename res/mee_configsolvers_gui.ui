@@ -79,7 +79,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="txt_startTime">
+      <widget class="QLineEdit" name="txtStartTime">
        <property name="text">
         <string>0</string>
        </property>
@@ -93,7 +93,7 @@
       </widget>
      </item>
      <item row="0" column="3">
-      <widget class="QLineEdit" name="txt_stopTime"/>
+      <widget class="QLineEdit" name="txtStopTime"/>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_7">
@@ -117,7 +117,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="txt_interval">
+      <widget class="QLineEdit" name="txtInterval">
        <property name="text">
         <string>1000</string>
        </property>
@@ -131,7 +131,7 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLineEdit" name="txt_tolerance">
+      <widget class="QLineEdit" name="txtTolerance">
        <property name="text">
         <string>0.0001</string>
        </property>
@@ -152,7 +152,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="cbx_solver">
+      <widget class="QComboBox" name="cbxSolver">
        <item>
         <property name="text">
          <string>dassl</string>
@@ -169,7 +169,7 @@
       <widget class="QComboBox" name="cbx_jmAlgorithm"/>
      </item>
      <item row="4" column="1">
-      <widget class="QComboBox" name="cbx_format">
+      <widget class="QComboBox" name="cbxFormat">
        <item>
         <property name="text">
          <string>.mat</string>

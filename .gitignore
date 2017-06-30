@@ -28,3 +28,7 @@ model/dsmodel.c
 \.idea/inspectionProfiles/
 
 \.idea/
+*.project
+config/simResources.properties
+config/simConfigurationDY.properties
+config/simConfigurationOMC.properties

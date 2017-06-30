@@ -43,42 +43,49 @@ class UI_ConfigSolver(QtGui.QDialog, form_gui):
     def btn_loadConfig_clicked(self):
         if self.rbt_dy.isChecked() | self.rbt_omc.isChecked():
             if self.rbt_dy.isChecked():
-                self.simconfig=SimulationConfigOMCDY([self.defaultconfigDY,'r+'])
+                self.__simconfig=SimulationConfigOMCDY([self.defaultconfigDY,'r+'])
             else:
-                self.simconfig= SimulationConfigOMCDY([self.defaultconfigOMC,'r+'])
-            self.simconfig.load_Properties()
-            self.txt_startTime.setText(self.simconfig.startTime)
-            self.txt_stopTime.setText(self.simconfig.stopTime)
-            self.txt_interval.setText(self.simconfig.numberOfIntervals)
-            self.txt_tolerance.setText(self.simconfig.tolerance)
+                self.__simconfig= SimulationConfigOMCDY([self.defaultconfigOMC,'r+'])
+            self.__simconfig.load_Properties()
+            self.txtStartTime.setText(self.__simconfig.startTime)
+            self.txtStopTime.setText(self.__simconfig.stopTime)
+            self.txtInterval.setText(self.__simconfig.numberOfIntervals)
+            self.txtTolerance.setText(self.__simconfig.tolerance)
             # solver and format
-            indx= self.cbx_solver.findText(self.simconfig.method)
+            indx= self.cbxSolver.findText(self.__simconfig.method)
             if (indx!= -1):
-                self.cbx_solver.setCurrentIndex(indx)
+                self.cbxSolver.setCurrentIndex(indx)
             else:
-                self.cbx_solver.setItemText(0, self.simconfig.method)
-            indx= self.cbx_format.findText(self.simconfig.outputFormat)
+                self.cbxSolver.setItemText(0, self.__simconfig.method)
+            indx= self.cbxFormat.findText(self.__simconfig.outputFormat)
             if (indx!= -1):
-                self.cbx_format.setCurrentIndex(indx)
+                self.cbxFormat.setCurrentIndex(indx)
             else:
-                self.cbx_format.setItemText(0, self.simconfig.outputFormat)
+                self.cbxFormat.setItemText(0, self.__simconfig.outputFormat)
         elif self.rbt_jm.isChecked():
-            self.simconfig= SimulationConfigJM([self.defaultconfigJM,'r+'])
+            self.__simconfig= SimulationConfigJM([self.defaultconfigJM,'r+'])
                 
     def btn_saveConfig_clicked(self):
         if self.rbt_dy.isChecked() | self.rbt_omc.isChecked():
             if self.rbt_dy.isChecked():
-                self.simconfig= SimulationConfigOMCDY([self.defaultconfigDY,'w'])
+                self.__simconfig= SimulationConfigOMCDY([self.defaultconfigDY,'w'])
+                self.__simconfig.compiler= 'dymola'
             else:
-                self.simconfig= SimulationConfigOMCDY([self.defaultconfigOMC,'w'])
-            self.simconfig.startTime= self.txt_startTime.text()
-            self.simconfig.stopTime= self.txt_stopTime.text()
-            self.simconfig.numberOfIntervals= self.txt_interval.text()
-            self.simconfig.tolerance= str(self.cbx_solver.currentText())
-            self.simconfig.method= str(self.cbx_format.currentText())
-            self.simconfig.outputFormat= self.txt_tolerance.text()
+                self.__simconfig= SimulationConfigOMCDY([self.defaultconfigOMC,'w'])
+                self.__simconfig.compiler= 'openmodelica'
+            self.__simconfig.startTime= str(self.txtStartTime.text())
+            self.__simconfig.stopTime= str(self.txtStopTime.text())
+            self.__simconfig.numberOfIntervals= str(self.txtInterval.text())
+            self.__simconfig.tolerance= str(self.txtTolerance.text())
+            self.__simconfig.method= str(self.cbxSolver.currentText())
+            self.__simconfig.outputFormat= str(self.cbxFormat.currentText())
         elif self.rbt_jm.isChecked():
-            self.simconfig= SimulationConfigJM([self.defaultconfigJM,'w'])
-        self.simconfig.save_Properties()
+            self.__simconfig= SimulationConfigJM([self.defaultconfigJM,'w'])
+            self.__simconfig.compiler= 'jmodelica'
+        self.__simconfig.save_Properties()
+        
+    @property
+    def simulationConfiguration(self):
+        return self.__simconfig
         
     

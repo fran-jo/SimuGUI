@@ -18,25 +18,25 @@ class StreamProperties(object):
         '''
         self.fitxer= params[0].replace('\\','/')
         self.readingMode= params[1]
-        self.properties= {'default':'property'}
+        self._properties= {}
         
     def save_Properties(self):
         fle= open(self.fitxer,'w')
-        for key in self.properties:
-            fle.writelines(key+"="+str(self.properties[key])+"\n")
+        for key in self._properties:
+            fle.writelines(key+"="+str(self._properties[key])+'\n')
     
     def load_Properties(self):
         fle= open(self.fitxer,self.readingMode)
         for line in fle:
             options=line.split('=')
-            self.properties[options[0]]= options[1]
-#         print self.properties
+            self._properties[options[0]]= options[1]
+#         print self._properties
     
     def get_Properties(self):
         '''
-        This function works after storing or loading properties into the dictionary object
+        This function works after storing or loading _properties into the dictionary object
         '''
-        return self.properties.values()
+        return self._properties.values()
     
 class SimulationResources(StreamProperties):
     '''
@@ -49,7 +49,6 @@ class SimulationResources(StreamProperties):
     modelName=''
     outputPath= ''
     '''
-    properties= {} 
     
     def __init__(self, params):
         '''
@@ -63,72 +62,92 @@ class SimulationResources(StreamProperties):
         self.__libraryfile= ''
         self.__modelname= ''
         StreamProperties.__init__(self, params)
-        self.properties= {'cimPath':'','modelPath':'','libraryPath':'','modelFile':'',\
+        self._properties= {'cimPath':'','modelPath':'','libraryPath':'','modelFile':'',\
                           'libraryFile':'','modelName':'','outputPath':''}
     
     def load_Properties(self):
         StreamProperties.load_Properties(self)
-        self.__cimfolder = self.properties['cimPath']
-        self.__modelfolder= self.properties['modelPath']
-        self.__libraryfolder= self.properties['libraryPath']
-        self.__outputfolder= self.properties['outputPath']
+        self.__cimfolder = self._properties['cimPath']
+        self.__modelfolder= self._properties['modelPath']
+        self.__libraryfolder= self._properties['libraryPath']
+        self.__outputfolder= self._properties['outputPath']
         
-    ''' getter/setter methods with properties '''
+    ''' getter/setter methods with _properties '''
     @property
-    def cimfolder(self):
-        self.__cimfolder= self.properties['cimPath']
+    def cimFolder(self):
+        self.__cimfolder= self._properties['cimPath'][:-1]
         return self.__cimfolder
-    @cimfolder.setter
-    def cimfolder(self, path):
-        self.properties['cimPath']= path
-        self.__cimfolder= path;
+    @cimFolder.setter
+    def cimFolder(self, path):
+        self._properties['cimPath']= path
+        self.__cimfolder= path
         
     @property
-    def modelfolder(self):
-        self.__modelfolder= self.properties['modelPath']
+    def modelFolder(self):
+        self.__modelfolder= self._properties['modelPath'][:-1]
         return self.__modelfolder
-    @modelfolder.setter
-    def modelfolder(self, path):
-        self.properties['modelPath']= path
-        self.__modelfolder= path;
-        
+    @modelFolder.setter
+    def modelFolder(self, path):
+        self._properties['modelPath']= path
+        self.__modelfolder= path
+
     @property
-    def libraryfolder(self):
-        self.__libraryfolder= self.properties['libraryPath']
-        return self.__libraryfolder
-    @libraryfolder.setter
-    def libraryfolder(self, path):
-        self.properties['libraryPath']= path
-        self.__libraryfolder= path;
-    
+    def modelFile(self):
+        self.__modelfile= self._properties['modelFile']
+        return self.__modelfile
+    @modelFile.setter
+    def modelFile(self, path):
+        if (path!= ''):
+            self._properties['modelFile']= path
+            self.__modelfile= path
+        else:
+            self._properties['modelFile']= 'none'
+            self.__modelfile= 'none'
+       
     @property
-    def outputfolder(self):
-        self.__outputfolder= self.properties['outputPath']
-        return self.__outputfolder
-    @outputfolder.setter
-    def outputfolder(self, path):
-        self.properties['outputPath']= path
-        self.__outputfolder= path;
-    
-    @property
-    def modelname(self):
-        self.__modelname= self.properties['modelName']
+    def modelName(self):
+        self.__modelname= self._properties['modelName']
         return self.__modelname
-    @modelname.setter
-    def modelname(self, path):
-        self.properties['modelName']= path
-        self.__modelname= path;
-    
-    #    
+    @modelName.setter
+    def modelName(self, path):
+        ''' path is the full path of the file '''
+        if (path!= ''):
+            nombre= path.split('/')[-2]
+            print nombre
+            self._properties['modelName']= nombre
+            print self._properties['modelName']
+            self.__modelname= nombre
+        else:
+            self._properties['modelName']= 'none'
+            self.__modelname= 'none'
+        ''' the name of the file without extension '''
         
-    def set_modelFile(self, _filename):
-        separateValues= _filename.split(os.sep)
-        modelFile = separateValues[-1]
-        self.properties['modelFile']= modelFile
-#         print modelFile
-        
-    def set_libraryFile(self, _filename):
-        separateValues= _filename.split(os.sep)
-        libraryFile = separateValues[-1]
-        self.properties['libraryFile']= libraryFile
-#         print libraryFile
+    @property
+    def libraryFolder(self):
+        self.__libraryfolder= self._properties['libraryPath'][:-1]
+        return self.__libraryfolder
+    @libraryFolder.setter
+    def libraryFolder(self, path):
+        self._properties['libraryPath']= path
+        self.__libraryfolder= path
+    @property
+    def libraryFile(self):
+        self.__libraryfile= self._properties['libraryFile']
+        return self.__libraryfile
+    @libraryFile.setter
+    def libraryFile(self, path):
+        if (path!= ''):
+            self._properties['libraryFile']= path
+            self.__libraryfile= path
+        else:
+            self._properties['libraryFile']= 'none'
+            self.__libraryfile= 'none'
+            
+    @property
+    def outputFolder(self):
+        self.__outputfolder= self._properties['outputPath'][:-1]
+        return self.__outputfolder
+    @outputFolder.setter
+    def outputFolder(self, path):
+        self._properties['outputPath']= path
+        self.__outputfolder= path

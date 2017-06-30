@@ -5,7 +5,6 @@
 	<projects>
 		<project>ScriptMAE</project>
 		<project>ScriptMEE</project>
-		<project>ScriptSE</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -21,7 +20,7 @@
 		<link>
 			<name>lib/modelica_java.jar</name>
 			<type>1</type>
-			<location>/Users/fran_jo/PhD_CIM/PYTHON/SimuGUI/lib/modelica_java.jar</location>
+			<location>C:/Users/fran_jo/PhD_CIM/PYTHON/SimuGUI/lib/modelica_java.jar</location>
 		</link>
 	</linkedResources>
 </projectDescription>
