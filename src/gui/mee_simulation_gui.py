@@ -10,6 +10,8 @@ from OMPython import OMCSession
 from classes import CommandOMC
 from src.engines.engineOpenModelica import EngineOMC
 from src.engines.engineDymola import EngineDY
+from modelicares import SimRes
+# from gui import msv_plot_gui
    
 form_gui = uic.loadUiType("./res/mee_simulation_gui.ui")[0] # Load the UI
                  
@@ -19,6 +21,7 @@ class UI_Simulation(QtGui.QDialog, form_gui):
     TODO: list of components and variables of the model 
     '''
     __engine= None 
+    __results= None
     
     def __init__(self, parent= None, configResources= None, configSimulation= None):
         QtGui.QDialog.__init__(self, parent)
@@ -34,14 +37,17 @@ class UI_Simulation(QtGui.QDialog, form_gui):
         self.btnRunSimulation.setIcon(QIcon('./res/img/Play.ico'))
         self.btnRunSimulation.setIconSize(QSize(48,48))
         self.btnRunSimulation.clicked.connect(self.onStartSimulation)
+        self.btnPlot.setIcon(QIcon('./res/img/Presentation.ico'))
+        self.btnPlot.setIconSize(QSize(48,48))
+        self.btnPlot.clicked.connect(self.browse_simulation)
         #
         self.__omcSession= OMCSession()
         if self.__simconfig.compiler== 'dymola':
-            self.__simulationTask = TaskThreadDY(self, self.__simsource, self.__simconfig)
+            self.__simulationTask = TaskThreadDY(self, self.__simsource, self.__simconfig, self.__results)
         elif self.__simconfig.compiler== 'jmodelica':
             pass
         elif self.__simconfig.compiler== 'openmodelica':
-            self.__simulationTask = TaskThreadOMC(self, self.__simsource, self.__simconfig, self.__omcSession)
+            self.__simulationTask = TaskThreadOMC(self, self.__simsource, self.__simconfig, self.__omcSession, self.__results)
         self.__simulationTask.taskFinished.connect(self.onFinishSimulation)
     
     ### save/load configuration
@@ -87,15 +93,20 @@ class UI_Simulation(QtGui.QDialog, form_gui):
         self.txtLibraryFile.setText(fileName)
         self.__simsource.libraryFile= str(fileName)
         
+    def browse_simulation(self):
+#         simmodel = SimRes('./SevenBus.Network_res.mat')
+        simmodel = SimRes('./res/dy/Two_Areas_PSSE_AVR_Noise_dassl_dsin.mat')
+#         simmodel.browse()
+        simbrowser = UI_Plot(self, simmodel)
+        simbrowser.show() 
     
-    ### TODO 
     def onStartSimulation(self):
         self.progressBar.setRange(0,0)
         self.__simulationTask.start()
             
     def onFinishSimulation(self):
         # Stop the pulsation
-        self.progressBar.setRange(0,1)
+        self.progressBar.setRange(0,100)
     
     def closeEvent(self, event):
         self.__omcSession.sendExpression('quit()')
@@ -105,14 +116,15 @@ class UI_Simulation(QtGui.QDialog, form_gui):
 class TaskThreadDY(QtCore.QThread):
     taskFinished = QtCore.pyqtSignal()
     
-    def __init__(self, parent= None, sources= None, experiment= None):
+    def __init__(self, parent= None, sources= None, experiment= None, results= None):
         QtCore.QThread.__init__(self, parent)
         self.__simsources= sources
         self.__experiment= experiment
+        self.__results= results
         
     def run(self):
         print 'DY Thread'
-        simCity= EngineDY(self.__simsources, self.__experiment)
+        simCity= EngineDY(self.__simsources, self.__experiment, self.__results)
         '''TODO: this function must store the result file in the proper folder '''
         simCity.simulate() 
         self.taskFinished.emit()  
@@ -120,10 +132,11 @@ class TaskThreadDY(QtCore.QThread):
 class TaskThreadJM(QtCore.QThread):
     taskFinished = QtCore.pyqtSignal()
     
-    def __init__(self, parent= None, sources= None, experiment= None):
+    def __init__(self, parent= None, sources= None, experiment= None, results= None):
         QtCore.QThread.__init__(self, parent)
         self.__sources= sources
         self.__experiment= experiment
+        self.__results= results
         
     def run(self):
         print 'JM Thread'
@@ -132,15 +145,16 @@ class TaskThreadJM(QtCore.QThread):
 class TaskThreadOMC(QtCore.QThread):
     taskFinished = QtCore.pyqtSignal()
     
-    def __init__(self, parent= None, sources= None, experiment= None, omcConnection= None):
+    def __init__(self, parent= None, sources= None, experiment= None, omcConnection= None, results= None):
         QtCore.QThread.__init__(self, parent)
         self.__simsources= sources
         self.__experiment= experiment
         self.__omcSession= omcConnection
+        self.__results= results
         
     def run(self):
         print 'OMC Thread'
-        simCity= EngineOMC(self.__simsources, self.__experiment, self.__omcSession)
+        simCity= EngineOMC(self.__simsources, self.__experiment, self.__omcSession, self.__results)
         '''TODO: this function must store the result file in the proper folder '''
         simCity.simulate() 
         self.taskFinished.emit()  

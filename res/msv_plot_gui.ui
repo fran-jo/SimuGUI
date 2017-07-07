@@ -23,7 +23,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QTreeWidget" name="treeWidget">
+  <widget class="QTreeWidget" name="twVariable">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -32,6 +32,15 @@
      <height>461</height>
     </rect>
    </property>
+   <property name="indentation">
+    <number>10</number>
+   </property>
+   <property name="columnCount">
+    <number>1</number>
+   </property>
+   <attribute name="headerVisible">
+    <bool>false</bool>
+   </attribute>
    <column>
     <property name="text">
      <string notr="true">1</string>

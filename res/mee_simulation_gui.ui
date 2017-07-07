@@ -83,7 +83,7 @@
       </widget>
      </item>
      <item row="0" column="3">
-      <widget class="QPushButton" name="btnSaveExperiment">
+      <widget class="QPushButton" name="btnPlot">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
