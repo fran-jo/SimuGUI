@@ -25,13 +25,13 @@
    <property name="title">
     <string>CIM Profiles</string>
    </property>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>20</y>
       <width>551</width>
-      <height>131</height>
+      <height>138</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
@@ -39,7 +39,7 @@
       <enum>QLayout::SetMaximumSize</enum>
      </property>
      <item row="3" column="2">
-      <widget class="QPushButton" name="btnBrowseEQ_4">
+      <widget class="QPushButton" name="btnBrowseDY">
        <property name="text">
         <string>Browse...</string>
        </property>
@@ -53,14 +53,14 @@
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QPushButton" name="btnBrowseEQ_2">
+      <widget class="QPushButton" name="btnBrowseTP">
        <property name="text">
         <string>Browse...</string>
        </property>
       </widget>
      </item>
      <item row="2" column="2">
-      <widget class="QPushButton" name="btnBrowseEQ_3">
+      <widget class="QPushButton" name="btnBrowseSV">
        <property name="text">
         <string>Browse...</string>
        </property>
