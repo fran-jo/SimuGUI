@@ -32,3 +32,5 @@ model/dsmodel.c
 config/simResources.properties
 config/simConfigurationDY.properties
 config/simConfigurationOMC.properties
+
+*.properties

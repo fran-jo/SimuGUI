@@ -13,16 +13,6 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="MatplotlibWidget" name="mplot_simOutputs" native="true">
-   <property name="geometry">
-    <rect>
-     <x>201</x>
-     <y>10</y>
-     <width>521</width>
-     <height>411</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QTreeWidget" name="twVariable">
    <property name="geometry">
     <rect>
@@ -32,8 +22,20 @@
      <height>461</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Gill Sans</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
    <property name="indentation">
     <number>10</number>
+   </property>
+   <property name="sortingEnabled">
+    <bool>true</bool>
+   </property>
+   <property name="wordWrap">
+    <bool>false</bool>
    </property>
    <property name="columnCount">
     <number>1</number>
@@ -129,14 +131,17 @@
     </size>
    </property>
   </widget>
+  <widget class="QWidget" name="centralWidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>239</x>
+     <y>89</y>
+     <width>401</width>
+     <height>231</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MatplotlibWidget</class>
-   <extends>QWidget</extends>
-   <header>matplotlibwidget</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
