@@ -1,32 +1,10 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright © 2009 Pierre Raybaut
-# Licensed under the terms of the MIT License
-
-"""
-MatplotlibWidget
-================
-
-Example of matplotlib widget for PyQt4
-
-Copyright © 2009 Pierre Raybaut
-This software is licensed under the terms of the MIT License
-
-Derived from 'embedding_in_pyqt4.py':
-Copyright © 2005 Florent Rougon, 2006 Darren Dale
-"""
-
-__version__ = "1.0.0"
-
 from PyQt4.QtGui import QSizePolicy
-from PyQt4.QtCore import QSize
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as Canvas
 from matplotlib.figure import Figure
 
 from matplotlib import rcParams
 rcParams['font.size'] = 9
-
 
 class MatplotlibWidget(Canvas):
     """
@@ -53,34 +31,22 @@ class MatplotlibWidget(Canvas):
     figure: instance of matplotlib.figure.Figure
     axes: figure axes
     """
-    def __init__(self, parent=None, title='', xlabel='', ylabel='',
-                 xlim=None, ylim=None, xscale='linear', yscale='linear',
-                 width=4, height=4, dpi=100, hold=False):
+    def __init__(self, parent=None, title='Title', xlabel='x label', ylabel='y label', dpi=100, hold=False):
         super(MatplotlibWidget, self).__init__(Figure())
-        self.figure = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.figure.add_subplot(111)
-        self.axes.set_title(title)
-        self.axes.set_xlabel(xlabel)
-        self.axes.set_ylabel(ylabel)
-        if xscale is not None:
-            self.axes.set_xscale(xscale)
-        if yscale is not None:
-            self.axes.set_yscale(yscale)
-        if xlim is not None:
-            self.axes.set_xlim(*xlim)
-        if ylim is not None:
-            self.axes.set_ylim(*ylim)
-        self.axes.hold(hold)
 
-        Canvas.__init__(self, self.figure)
-#         self.setParent(parent)
-# 
+        self.setParent(parent)
+        self.figure = Figure(figsize=(520, 390), dpi=dpi)
+        self.canvas = Canvas(self.figure)
+        self.theplot = self.figure.add_subplot(111)        
+        self.theplot.set_title(title)
+        self.theplot.set_xlabel(xlabel)
+        self.theplot.set_ylabel(ylabel)
+        self.theplot.grid()
+        
         Canvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         Canvas.updateGeometry(self)
 
-    def sizeHint(self):
-        w, h = self.get_width_height()
-        return QSize(w, h)
-
-    def minimumSizeHint(self):
-        return QSize(10, 10)
+    def plot(self, x, y):
+        self.theplot.plot(x,y)
+        self.draw()  
+        self.theplot.hold(False)          

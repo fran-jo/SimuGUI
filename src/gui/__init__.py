@@ -3,3 +3,4 @@ from mee_configsolvers_gui import UI_ConfigSolver
 from mee_simulation_gui import UI_Simulation
 from msv_plot_gui import UI_Plot
 from msv_m2m_gui import UI_M2M
+from mae_signalanalysis_gui import UI_SignalAnalysis

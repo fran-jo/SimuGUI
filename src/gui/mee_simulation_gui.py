@@ -8,9 +8,10 @@ from PyQt4.QtCore import QSize
 from PyQt4.QtGui import QIcon
 from OMPython import OMCSession
 from classes import CommandOMC
-from src.engines.engineOpenModelica import EngineOMC
-from src.engines.engineDymola import EngineDY
+from engines.engineOpenModelica import EngineOMC
+from engines.engineDymola import EngineDY
 from modelicares import SimRes
+from gui.msv_plot_gui import UI_Plot
 # from gui import msv_plot_gui
    
 form_gui = uic.loadUiType("./res/mee_simulation_gui.ui")[0] # Load the UI
@@ -40,15 +41,15 @@ class UI_Simulation(QtGui.QDialog, form_gui):
         self.btnPlot.setIcon(QIcon('./res/img/Presentation.ico'))
         self.btnPlot.setIconSize(QSize(48,48))
         self.btnPlot.clicked.connect(self.browse_simulation)
-        #
-        self.__omcSession= OMCSession()
-        if self.__simconfig.compiler== 'dymola':
-            self.__simulationTask = TaskThreadDY(self, self.__simsource, self.__simconfig, self.__results)
-        elif self.__simconfig.compiler== 'jmodelica':
-            pass
-        elif self.__simconfig.compiler== 'openmodelica':
-            self.__simulationTask = TaskThreadOMC(self, self.__simsource, self.__simconfig, self.__omcSession, self.__results)
-        self.__simulationTask.taskFinished.connect(self.onFinishSimulation)
+        #debug
+#         self.__omcSession= OMCSession()
+#         if self.__simconfig.compiler== 'dymola':
+#             self.__simulationTask = TaskThreadDY(self, self.__simsource, self.__simconfig, self.__results)
+#         elif self.__simconfig.compiler== 'jmodelica':
+#             pass
+#         elif self.__simconfig.compiler== 'openmodelica':
+#             self.__simulationTask = TaskThreadOMC(self, self.__simsource, self.__simconfig, self.__omcSession, self.__results)
+#         self.__simulationTask.taskFinished.connect(self.onFinishSimulation)
     
     ### save/load configuration
     def load_configuration(self):
@@ -95,6 +96,8 @@ class UI_Simulation(QtGui.QDialog, form_gui):
         
     def browse_simulation(self):
 #         simmodel = SimRes('./SevenBus.Network_res.mat')
+        #debug
+        ''' TODO change debug object, use simulation results '''
         simmodel = SimRes('./res/dy/Two_Areas_PSSE_AVR_Noise_dassl_dsin.mat')
 #         simmodel.browse()
         simbrowser = UI_Plot(self, simmodel)

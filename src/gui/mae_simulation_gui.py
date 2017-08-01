@@ -10,11 +10,11 @@ from OMPython import OMCSession
 import psspy
 import dyntools
 from inout.StreamH5File import InputH5Stream
-from inout.StreamCSVFile import InputCSVStream
+from inout.streamcsvfile import InputCSVStream
 from ctrl.validation import ValidationERA
 from ctrl.analysis import QuantitativeAnalysis
 from mae_modeestimation import ModeEstimationGUI
-from inout.StreamOUTFile import InputOUTStream
+from inout.streamoutfile import InputOUTStream
    
 form_class = uic.loadUiType("./res/mae_simulation_gui.ui")[0] # Load the UI
                  

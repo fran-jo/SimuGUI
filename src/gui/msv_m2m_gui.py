@@ -27,11 +27,15 @@ class UI_M2M(QtGui.QDialog, form_gui):
         self.btnToModelica.setIconSize(QSize(48,48))
         self.btnToModelica.clicked.connect(self.cim2modelica)
         #
-        self.btnEditModel.setIcon(QIcon('./res/img/Settings.ico'))
+        self.btnEditModel.setIcon(QIcon('./res/img/Folder.ico'))
         self.btnEditModel.setIconSize(QSize(48,48))
         self.btnEditModel.setEnabled(False)
         self.btnEditModel.clicked.connect(self.browseModels)
         #
+        self.btnCheckModel.setIcon(QIcon('./res/img/Gnome_Preferences_System.ico'))
+        self.btnCheckModel.setIconSize(QSize(48,48))
+        self.btnCheckModel.setEnabled(False)
+        self.btnCheckModel.clicked.connect(self.checkModel)
 #         self.cbxCimSchema.activated['QString'].connect(self.set_models)
         
     def loadProfile(self, cimProfile):
@@ -57,6 +61,7 @@ class UI_M2M(QtGui.QDialog, form_gui):
     def onFinished(self):
         print "M2M finished!"
         self.btnEditModel.setEnabled(True)
+        self.btnCheckModel.setEnabled(True)
         
     def browseModels(self):
         dir_to_show = './model/'+ self.txtModelName.text()
@@ -64,3 +69,8 @@ class UI_M2M(QtGui.QDialog, form_gui):
         process.startDetached("open", [dir_to_show])
         if process.waitForFinished():
             process.close()
+            
+    def checkModel(self):
+        ''' load modelica library and openipsl library '''
+        ''' use dymola/openmodelica check function '''
+        pass
