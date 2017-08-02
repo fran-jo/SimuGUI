@@ -11,7 +11,7 @@ from classes import CommandOMC
 from engines.engineOpenModelica import EngineOMC
 from engines.engineDymola import EngineDY
 from modelicares import SimRes
-from gui.msv_plot_gui import UI_Plot
+from gui.mee_plot_gui import UI_Plot_MEE
 # from gui import msv_plot_gui
    
 form_gui = uic.loadUiType("./res/mee_simulation_gui.ui")[0] # Load the UI
@@ -100,7 +100,7 @@ class UI_Simulation(QtGui.QDialog, form_gui):
         ''' TODO change debug object, use simulation results '''
         simmodel = SimRes('./res/dy/Two_Areas_PSSE_AVR_Noise_dassl_dsin.mat')
 #         simmodel.browse()
-        simbrowser = UI_Plot(self, simmodel)
+        simbrowser = UI_Plot_MEE(self, simmodel)
         simbrowser.show() 
     
     def onStartSimulation(self):

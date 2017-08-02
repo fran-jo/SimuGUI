@@ -23,12 +23,14 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
-        self.mplotwidget = MatplotlibWidget(self.centralWidget)
-        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 520, 400))
-        self.mplotwidget.setObjectName("mplotwidget")
+        self.mplotSimwidget = MatplotlibWidget(self.simPlotWidget)
+        self.mplotSimwidget.setGeometry(QtCore.QRect(0, 0, 400, 312))
+        self.mplotSimwidget.setObjectName("mplotSimwidget")
         #
-        #self.btnImportMeasurements.setEnabled(importEnabled)
-        self.btnImportMeasurements.clicked.connect(self.__importMeasurements)
+        self.mplotMeaswidget = MatplotlibWidget(self.measPlotWidget)
+        self.mplotMeaswidget.setGeometry(QtCore.QRect(0, 0, 400, 312))
+        self.mplotMeaswidget.setObjectName("mplotMeaswidget")
+        #
     
     def __importMeasurements(self):
         windialog = UI_ImportData(self)

@@ -13,19 +13,19 @@ from inout.streamcimh5 import StreamCIMH5
 # from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 # import matplotlib.pyplot as plt
 
-form_gui = uic.loadUiType("./res/msv_plot_gui.ui")[0] # Load the UI
+form_gui = uic.loadUiType("./res/mee_plot_gui.ui")[0] # Load the UI
 
-class UI_Plot(QtGui.QDialog, form_gui):
+class UI_Plot_MEE(QtGui.QDialog, form_gui):
     
     __results= None
+    __dbh5api= None
     
-    def __init__(self, parent= None, simulationResults= None, 
-                 exportEnabled= True, importEnabled= True):
+    def __init__(self, parent= None, simulationResults= None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
         self.mplotwidget = MatplotlibWidget(self.centralWidget)
-        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 520, 400))
+        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 520, 380))
         self.mplotwidget.setObjectName("mplotwidget")
         #
         self.__results= simulationResults
@@ -35,16 +35,14 @@ class UI_Plot(QtGui.QDialog, form_gui):
         self.__build_tree(rootItem, arbol)
         self.twVariable.itemSelectionChanged.connect(self.__onSelectionChanged)
         #
-        self.cbxMeasurements.setEnabled(importEnabled)
-        self.btnBrowseMeasurements.setEnabled(importEnabled)
-        self.label_2.setEnabled(importEnabled)
-        #
         self.btnSaveSignals.clicked.connect(self.__saveSignals)
-        self.btnSaveSignals.setEnabled(exportEnabled)
         #
-        self.btnLoadSignals.setEnabled(importEnabled)
         self.btnLoadSignals.clicked.connect(self.__loadSignals)
-    
+   
+    # This function has been copied and modified from ModelicaRes version 0.12
+    # (Kevin Davies,
+    # http://kdavies4.github.io/ModelicaRes/,
+    # BSD License).
     def __build_tree(self, itemParent=None, branches=None):
         #itemParent.setExpanded(True)
         if type(branches) is dict:
@@ -73,11 +71,16 @@ class UI_Plot(QtGui.QDialog, form_gui):
                 paramName= parentName+ '.'+ childName
             else:
                 paramName= grandpaName+ '.'+ parentName+ '.'+ childName
-        self.__preview(str(paramName), self.__results) #TODO
+        self.__view_Signal(str(paramName), self.__results)
         
-    def __preview(self, name, sim):
-        """Show the variable's attributes and a small plot.
-        fix it using the matplotlibwidget"""
+    # This function has been copied and modified from ModelicaRes version 0.12
+    # (Kevin Davies,
+    # http://kdavies4.github.io/ModelicaRes/,
+    # BSD License)
+    def __view_Signal(self, name, sim):
+        '''Show the variable's attributes and a small plot.
+        fix it using the matplotlibwidget
+        Using ModelicaRes for ploting simulation signals'''
         if name:
             text = 'Name: ' + name
             text += '\n' + 'Description: ' + sim[name].description
@@ -113,7 +116,7 @@ class UI_Plot(QtGui.QDialog, form_gui):
             else:
                 paramName= grandpaName+ '.'+ parentName+ '.'+ childName
         dbh5api= StreamCIMH5('./db/h5', self.__results.fbase)
-        dbh5api.open(self.__results.fbase)
+        dbh5api.open(self.__results.fbase, mode= 'a')
         if not dbh5api.exist_PowerSystemResource(str(parentName)):
             dbh5api.add_PowerSystemResource(str(parentName))
         else:
@@ -132,7 +135,6 @@ class UI_Plot(QtGui.QDialog, form_gui):
             dbh5api.update_AnalogValue(str(childName),
                                        self.__results[str(paramName)].times().tolist(),
                                        self.__results[str(paramName)].values().tolist())
-    ''' TODO: onece saved, file must appear in combobox '''
-    
-    def __loadSignals(self):
-        pass
+        dbh5api.close()
+        
+        

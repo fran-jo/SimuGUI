@@ -34,3 +34,4 @@ config/simConfigurationDY.properties
 config/simConfigurationOMC.properties
 
 *.properties
+*.properties

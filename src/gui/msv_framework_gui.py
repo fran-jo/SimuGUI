@@ -8,7 +8,7 @@ import sys
 from PyQt4 import QtGui, uic
 from PyQt4.QtCore import QSize
 from PyQt4.QtGui import QApplication, QIcon
-from gui import UI_LoadSources, UI_ConfigSolver, UI_Simulation, UI_Plot, UI_M2M, UI_SignalAnalysis
+from gui import UI_LoadSources, UI_ConfigSolver, UI_Simulation, UI_Plot_MEE, UI_Plot_MAE, UI_M2M, UI_SignalAnalysis
 from modelicares import SimRes
 #debug
 from ctrl import SimulationResources
@@ -17,7 +17,6 @@ from ctrl import SimulationConfigOMCDY
 main_form = uic.loadUiType("./res/msv_framework_gui.ui")[0] # Load the UI
 # form_confSolver = uic.loadUiType("./res/mee_configsolvers_gui.ui")[0] # Load the UI
 form_simulate = uic.loadUiType("./res/mee_simulation_gui.ui")[0] # Load the UI
-form_plot = uic.loadUiType("./res/msv_plot_gui.ui")[0] # Load the UI
 
 class MVSGUI(QtGui.QMainWindow, main_form):
     def __init__(self, parent=None):
@@ -74,11 +73,11 @@ class MVSGUI(QtGui.QMainWindow, main_form):
         if checked== None: return
         #debug
         ''' TODO change debug object, use loaded configurations '''
-        self.simulationDialog = UI_Simulation(
-            self, SimulationResources(['./config/simResources.properties','r+']), 
-            SimulationConfigOMCDY(['./config/simConfigurationOMC.properties','w']))
-#         self.simulattionDialog = UI_Simulation(self, self.sourcesDialog.simulationResources, 
-#                                                self.configSolver.simulationConfiguration)
+#         self.simulationDialog = UI_Simulation(
+#             self, SimulationResources(['./config/simResources.properties','r+']), 
+#             SimulationConfigOMCDY(['./config/simConfigurationOMC.properties','w']))
+        self.simulattionDialog = UI_Simulation(self, self.sourcesDialog.simulationResources, 
+                                               self.configSolver.simulationConfiguration)
         self.simulationDialog.show()
         
     def plotSimulation(self, checked=None):
@@ -86,7 +85,7 @@ class MVSGUI(QtGui.QMainWindow, main_form):
         #debug
         simmodel = SimRes('./res/dy/Two_Areas_PSSE_AVR_Noise_dassl_dsin.mat')
 #         simmodel.browse()
-        simbrowser = UI_Plot(self, simmodel, True, False)
+        simbrowser = UI_Plot_MEE(self, simmodel)
         simbrowser.setWindowTitle('Simulations')
         simbrowser.show() 
     
@@ -94,9 +93,9 @@ class MVSGUI(QtGui.QMainWindow, main_form):
         if checked== None: return
         #debug
         ''' TODO change debug object, use simulation results '''
-        measmodel = SimRes('./res/dy/Two_Areas_PSSE_AVR_Noise_dassl_dsin.mat')
+#         measmodel = SimRes('./res/dy/Two_Areas_PSSE_AVR_Noise_dassl_dsin.mat')
 #         simmodel.browse()
-        measbrowser = UI_Plot(self, measmodel, False, True)
+        measbrowser = UI_Plot_MAE(self)
         measbrowser.setWindowTitle('Measurements')
         measbrowser.show() 
         

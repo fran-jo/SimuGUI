@@ -6,40 +6,40 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>803</width>
-    <height>605</height>
+    <width>793</width>
+    <height>535</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>11</x>
-     <y>9</y>
-     <width>781</width>
-     <height>587</height>
+     <x>10</x>
+     <y>10</y>
+     <width>770</width>
+     <height>514</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0">
-    <item row="2" column="1" colspan="3">
-     <widget class="QWidget" name="centralWidget" native="true">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetFixedSize</enum>
+    </property>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="btnImportMeasurements">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-        <horstretch>1</horstretch>
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="minimumSize">
-       <size>
-        <width>520</width>
-        <height>380</height>
-       </size>
+      <property name="text">
+       <string>Import...</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
+    <item row="0" column="1">
      <widget class="QLabel" name="label_2">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -55,36 +55,10 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="3">
-     <widget class="QPushButton" name="btnBrowseMeasurements">
+    <item row="0" column="2" colspan="2">
+     <widget class="QComboBox" name="cbxMeasurements">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Browse...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3">
-     <widget class="QPushButton" name="btnBrowsSimResults">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Browse...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1" colspan="2">
-     <widget class="QComboBox" name="cbxSimulationResults">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -97,23 +71,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::RightToLeft</enum>
-      </property>
-      <property name="text">
-       <string>Simulation Outputs</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0" rowspan="2">
+    <item row="1" column="0" rowspan="2">
      <widget class="QTreeWidget" name="twVariable">
       <property name="enabled">
        <bool>true</bool>
@@ -176,58 +134,23 @@
       </column>
      </widget>
     </item>
-    <item row="1" column="1" colspan="2">
-     <widget class="QComboBox" name="cbxMeasurements">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>450</width>
-        <height>26</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="3">
-     <widget class="QPushButton" name="btnLoadSignals">
+    <item row="1" column="1" colspan="3">
+     <widget class="QWidget" name="centralWidget" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-        <horstretch>0</horstretch>
+        <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="minimumSize">
        <size>
-        <width>32</width>
-        <height>32</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>110</width>
-        <height>48</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>From H5</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>img/1495484755_Log Out.ico</normaloff>img/1495484755_Log Out.ico</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>32</width>
-        <height>32</height>
+        <width>520</width>
+        <height>380</height>
        </size>
       </property>
      </widget>
     </item>
-    <item row="3" column="2">
+    <item row="2" column="2">
      <widget class="QPushButton" name="btnSaveSignals">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -249,6 +172,41 @@
       </property>
       <property name="text">
        <string>To H5</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>img/1495484755_Log Out.ico</normaloff>img/1495484755_Log Out.ico</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QPushButton" name="btnLoadSignals">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>110</width>
+        <height>48</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>From H5</string>
       </property>
       <property name="icon">
        <iconset>
