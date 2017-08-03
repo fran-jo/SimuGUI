@@ -8,9 +8,9 @@ from PyQt4 import QtGui, uic, QtCore
 from PyQt4.QtGui import QTreeWidgetItem
 from matplotlibwidget import MatplotlibWidget
 from inout.streamcimh5 import StreamCIMH5
-# from matplotlib.backends.backend_qt4agg import FigureCanvasAgg as FigureCanvas
-# from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-# import matplotlib.pyplot as plt
+
+'''TODO Import Selected variables into H5 '''
+'''TODO handel multiple selection '''
 
 form_gui = uic.loadUiType("./res/mae_plot_gui.ui")[0] # Load the UI
 
@@ -36,14 +36,14 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
             
     def load_h5db(self):
         fsm = QtGui.QFileSystemModel()
-        index = fsm.setRootPath("./db/h5")
+        index = fsm.setRootPath("./db/signals")
         self.cbxMeasurements.setModel(fsm)
         self.cbxMeasurements.setRootModelIndex(index)
     
     def __loadSignals(self, text):
         ''' load signals from the h5 database '''
         self.__measurements= str(text) #h5 file name 
-        self.__dbh5api= StreamCIMH5('./db/h5', self.__measurements)
+        self.__dbh5api= StreamCIMH5('./db/signals', self.__measurements)
         self.__dbh5api.open(self.__measurements, mode= 'r')
         # TODO select model, root group h5
         self.twVariable.clear()
@@ -81,8 +81,6 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
             self.__dbh5api.select_PowerSystemResource(splitName[-2])
             senyal= self.__dbh5api.select_AnalogMeasurement(splitName[-1])
             ''' TODO updated title, xAxis and yAxis labels
-            TODO handle multiple signals- hold option
-            TODO plot GUI to accept HDF5 format
             TODO export to CSV '''
             self.mplotwidget.theplot.set_title('Something here')
             self.mplotwidget.theplot.set_xlabel('Time (s)')

@@ -71,7 +71,7 @@ class UI_ImportData(QtGui.QDialog, form_gui):
             childName = baseNode.text(0)
         ''' TODO create paramName when the name is composed by >2 levels ex: a.b.c '''
         paramName= parentName+ '.'+ childName
-        dbh5api= StreamCIMH5('./db/h5', self.__results.fbase)
+        dbh5api= StreamCIMH5('./db/signals', self.__results.fbase)
         dbh5api.open(self.__results.fbase)
         if not dbh5api.exist_PowerSystemResource():
             dbh5api.add_PowerSystemResource(str(parentName))

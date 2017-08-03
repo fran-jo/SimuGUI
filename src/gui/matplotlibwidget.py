@@ -46,7 +46,7 @@ class MatplotlibWidget(Canvas):
         Canvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         Canvas.updateGeometry(self)
 
-    def plot(self, x, y):
+    def plot(self, x, y, hold= False):
         self.theplot.plot(x,y)
         self.draw()  
-        self.theplot.hold(True)          
+        self.theplot.hold(hold)          

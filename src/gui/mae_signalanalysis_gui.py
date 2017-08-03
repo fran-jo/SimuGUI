@@ -4,20 +4,19 @@ Created on 19 jan 2016
 @author: fragom
 '''
 
+import os
 from PyQt4 import QtGui, uic, QtCore
-from PyQt4.QtGui import QTableWidget, QTreeWidgetItem
+from PyQt4.QtGui import QTreeWidgetItem
 from modelicares import util, SimRes
 from matplotlibwidget import MatplotlibWidget
 from inout.streamcimh5 import StreamCIMH5
-# from matplotlib.backends.backend_qt4agg import FigureCanvasAgg as FigureCanvas
-# from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-# import matplotlib.pyplot as plt
+from methods import MethodAmbientAnalysis
 
 __form_gui = uic.loadUiType("./res/mae_signalanalysis_gui.ui")[0] # Load the UI
 
 class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
     
-    __simResults= None
+    __outputSignal= None
     __measurements= None
     
     def __init__(self, parent= None, simulationResults= None):
@@ -33,6 +32,8 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         #
         self.cbxMeasurements.activated['QString'].connect(self.__load_Measurements)
         self.onLoad_populateMeasurements()
+        #
+        self.btnBasicMethod.clicked.connect(self.onStart_basicMethod)
         
     def onLoad_populateOutputFiles(self):
         ''' list in the combobox all the outputs files from Dy, OMC, JM '''
@@ -47,7 +48,7 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         
     def onLoad_populateMeasurements(self):
         ''' list in the combobox all the outputs files from H5'''
-        path= QtCore.QDir('./db/h5')
+        path= QtCore.QDir('./db/signals')
         files= path.entryList(QtCore.QDir.Files, QtCore.QDir.Name)
         self.cbxMeasurements.addItems(files)
         
@@ -123,7 +124,7 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
     def __load_Measurements(self, dbh5file):
         ''' load signals from the h5 database '''
         self.__measurements= str(dbh5file) #h5 file name 
-        self.__dbh5api= StreamCIMH5('./db/h5', self.__measurements)
+        self.__dbh5api= StreamCIMH5('./db/signals', self.__measurements)
         self.__dbh5api.open(self.__measurements, mode= 'r')
         # TODO select model, root group h5
         self.twMeasVariable.clear()
@@ -158,7 +159,7 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         print '%s.%s' % (splitName[-2], splitName[-1])
         if self.__dbh5api.exist_PowerSystemResource(splitName[-2]):
             self.__dbh5api.select_PowerSystemResource(splitName[-2])
-            senyal= self.__dbh5api.select_AnalogMeasurement(splitName[-1])
+            self.__measurement= self.__dbh5api.select_AnalogMeasurement(splitName[-1])
 #             text = 'Name: ' + senyal['unitSymbol']
 #             text += '\n' + 'Description: ' + senyal['unitMultiplier']
 #             text += '\n' + 'unit: ' + senyal['measurementType']
@@ -170,10 +171,26 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
             self.mplotwidget.theplot.set_title('Something here')
             self.mplotwidget.theplot.set_xlabel('Time (s)')
             self.mplotwidget.theplot.set_ylabel('Magnitude (unit)')
-            self.mplotwidget.plot(senyal['sampleTime'], senyal['magnitude'])
+            self.mplotwidget.plot(self.__measurement['sampleTime'], self.__measurement['magnitude'])
         else:
             print "nothing to plot"
-    
-    def __saveAnalysis(self):
-        pass
+
+    # Analysis Engine Methods
+    def onStart_basicMethod(self):
+        '''TODO: selected measurement from modelica outputs '''
+        self.__analysisTask = MethodAmbientAnalysis(self.__measurement['magnitude'])
+        self.__analysisTask.toolDir= os.getcwd()
+        self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)
+        self.__analysisTask.start()
+            
+    def onFinish_basicMethod(self):
+        ''' TODO: show the results on the text area / table '''
+        os.chdir(self.__analysisTask.toolDir)
+        self.__analysisTask.gather_EigenValues()
+        print self.__analysisTask.modes
+        ''' TODO: first use the mode_estimation_res.h5 directly '''
+        ''' TODO: second, use the whole workflow '''
+        
+
+
     

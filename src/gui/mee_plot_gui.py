@@ -9,9 +9,9 @@ from PyQt4.QtGui import QTreeWidgetItem
 from modelicares import util
 from matplotlibwidget import MatplotlibWidget
 from inout.streamcimh5 import StreamCIMH5
-# from matplotlib.backends.backend_qt4agg import FigureCanvasAgg as FigureCanvas
-# from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-# import matplotlib.pyplot as plt
+
+'''TODO Import Selected variables into H5 '''
+'''TODO handel multiple selection '''
 
 form_gui = uic.loadUiType("./res/mee_plot_gui.ui")[0] # Load the UI
 
@@ -113,7 +113,7 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
                 paramName= parentName+ '.'+ childName
             else:
                 paramName= grandpaName+ '.'+ parentName+ '.'+ childName
-        dbh5api= StreamCIMH5('./db/h5', self.__results.fbase)
+        dbh5api= StreamCIMH5('./db/signals', self.__results.fbase)
         dbh5api.open(self.__results.fbase, mode= 'a')
         if not dbh5api.exist_PowerSystemResource(str(parentName)):
             dbh5api.add_PowerSystemResource(str(parentName))
