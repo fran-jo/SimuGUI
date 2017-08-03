@@ -80,10 +80,6 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
         if self.__dbh5api.exist_PowerSystemResource(splitName[-2]):
             self.__dbh5api.select_PowerSystemResource(splitName[-2])
             senyal= self.__dbh5api.select_AnalogMeasurement(splitName[-1])
-#             text = 'Name: ' + senyal['unitSymbol']
-#             text += '\n' + 'Description: ' + senyal['unitMultiplier']
-#             text += '\n' + 'unit: ' + senyal['measurementType']
-#             text += '\n' + 'displayUnit: ' + senyal['measurementType']
             ''' TODO updated title, xAxis and yAxis labels
             TODO handle multiple signals- hold option
             TODO plot GUI to accept HDF5 format

@@ -35,7 +35,7 @@ class MatplotlibWidget(Canvas):
         super(MatplotlibWidget, self).__init__(Figure())
 
         self.setParent(parent)
-        self.figure = Figure(figsize=(520, 390), dpi=dpi)
+        self.figure = Figure(figsize=(470, 300), dpi=dpi)
         self.canvas = Canvas(self.figure)
         self.theplot = self.figure.add_subplot(111)        
         self.theplot.set_title(title)
@@ -49,4 +49,4 @@ class MatplotlibWidget(Canvas):
     def plot(self, x, y):
         self.theplot.plot(x,y)
         self.draw()  
-        self.theplot.hold(False)          
+        self.theplot.hold(True)          

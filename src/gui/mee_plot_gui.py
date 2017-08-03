@@ -36,8 +36,6 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
         self.twVariable.itemSelectionChanged.connect(self.__onSelectionChanged)
         #
         self.btnSaveSignals.clicked.connect(self.__saveSignals)
-        #
-        self.btnLoadSignals.clicked.connect(self.__loadSignals)
    
     # This function has been copied and modified from ModelicaRes version 0.12
     # (Kevin Davies,
