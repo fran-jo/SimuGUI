@@ -33,8 +33,4 @@ model/dsmodel.c
 *.properties
 *.properties
 
-db/measurements/
-
-db/simulation/
-
 model/N44_MODEL/
