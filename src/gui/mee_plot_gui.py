@@ -4,6 +4,7 @@ Created on 19 jan 2016
 @author: fragom
 '''
 
+import platform
 from PyQt4 import QtGui, uic, QtCore
 from PyQt4.QtGui import QTreeWidgetItem
 from modelicares import util
@@ -42,6 +43,8 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
    
     def __browseFolder(self):
         carpetaName = QtGui.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        if platform.system()== 'Windows':
+            carpetaName= carpetaName.replace('\\', '/')
         splitcName= carpetaName.split('/')
         relativepath= './'+ splitcName[-2]+ '/'+ splitcName[-1]+ '/'
         self.cbxOutputs.clear()

@@ -3,7 +3,7 @@ Created on 19 jan 2016
 
 @author: fragom
 '''
-import sys, os
+import platform
 from PyQt4 import uic, QtCore, QtGui
 from PyQt4.QtGui import QTreeWidgetItem
 from inout.streamcimh5 import StreamCIMH5
@@ -35,7 +35,9 @@ class UI_ImportData(QtGui.QDialog, form_gui):
         self.btnChooseItems.clicked.connect(self.__chooseItems)
     
     def __browseFolder(self):
-        carpetaName = QtGui.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        carpetaName = str(QtGui.QFileDialog.getExistingDirectory(self, 'Select Folder'))
+        if platform.system()== 'Windows':
+            carpetaName= carpetaName.replace('\\', '/')
         splitcName= carpetaName.split('/')
         relativepath= './'+ splitcName[-2]+ '/'+ splitcName[-1]+ '/'
         self.cbxMeasFiles.clear()
@@ -110,8 +112,6 @@ class UI_ImportData(QtGui.QDialog, form_gui):
 #         sourceout.load_channelData()
         
     def __saveSignals(self):
-        ''' TODO test function '''
-        ''' TODO treat multiple signals from here, using StreamCIMH5 API '''
         getSelected = self.twToImport.selectedItems()
         if getSelected:
             baseNode = getSelected[0]
@@ -119,7 +119,7 @@ class UI_ImportData(QtGui.QDialog, form_gui):
             childName = baseNode.text(0)
         ''' TODO create paramName when the name is composed by >2 levels ex: a.b.c '''
         paramName= parentName+ '.'+ childName
-        dbh5api= StreamCIMH5('./db/signals', self.__results.fbase)
+        dbh5api= StreamCIMH5('./db/simulation', self.__results.fbase)
         dbh5api.open(self.__results.fbase)
         if not dbh5api.exist_PowerSystemResource():
             dbh5api.add_PowerSystemResource(str(parentName))
@@ -141,3 +141,4 @@ class UI_ImportData(QtGui.QDialog, form_gui):
             dbh5api.update_AnalogValue(str(childName),
                                        self.__results[str(paramName)].times().tolist(),
                                        self.__results[str(paramName)].values().tolist())
+        dbh5api.close()

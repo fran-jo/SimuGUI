@@ -3,9 +3,10 @@ Created on 19 jan 2016
 
 @author: fragom
 '''
-
+'''TODO add a tab page for each source (simulation,measurement) '''
 import os
 from PyQt4 import QtGui, uic, QtCore
+from PyQt4.QtCore import QString
 from PyQt4.QtGui import QTreeWidgetItem
 from matplotlibwidget import MatplotlibWidget
 from inout.streamcimh5 import StreamCIMH5
@@ -35,6 +36,9 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         self.onLoad_populateMeasurements()
         #
         self.btnBasicMethod.clicked.connect(self.onStart_basicMethod)
+        # table of analysis results
+        self.tbwAnalysisRes.setColumnCount(5)
+        self.tbwAnalysisRes.setHorizontalHeaderLabels(QString(" ;Sim Freq.;Sim Damp.;Meas Freq..;Meas Damp.").split(";"))
         
     def onLoad_populateOutputFiles(self):
         ''' List in the combobox all the outputs files from the database of Dy, OMC, JM results 
@@ -139,14 +143,26 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)
         self.__analysisTask.start()
         #debug code
-        self.onFinish_basicMethod()
+#         self.onFinish_basicMethod()
             
     def onFinish_basicMethod(self):
         ''' TODO: show the results on the text area / table '''
         os.chdir(self.__analysisTask.toolDir)
         self.__analysisTask.gather_EigenValues()
-        print self.__analysisTask.simulationModes
-        print self.__analysisTask.__measurementModes
+        for mode in self.__analysisTask.simulationModes:
+            rowPosition = self.tbwAnalysisRes.rowCount()
+            self.tbwAnalysisRes.insertRow(rowPosition)
+            self.tbwAnalysisRes.setItem(rowPosition, 0, QtGui.QTableWidgetItem('Mode '+ str(rowPosition)))
+            self.tbwAnalysisRes.setItem(rowPosition, 1, QtGui.QTableWidgetItem(str(mode.real)))
+            self.tbwAnalysisRes.setItem(rowPosition, 2, QtGui.QTableWidgetItem(str(mode.imag)))
+        rowPosition= 0
+        for mode in self.__analysisTask.measurementModes:
+            self.tbwAnalysisRes.setItem(rowPosition, 3, QtGui.QTableWidgetItem(str(mode.real)))
+            self.tbwAnalysisRes.setItem(rowPosition, 4, QtGui.QTableWidgetItem(str(mode.imag)))
+            if rowPosition> self.tbwAnalysisRes.rowCount():
+                self.tbwAnalysisRes.insertRow(rowPosition)
+            rowPosition= rowPosition+ 1
+        self.tbwAnalysisRes.show()
         ''' TODO: first use the mode_estimation_res.h5 directly '''
         ''' TODO: second, use the whole workflow '''
         
