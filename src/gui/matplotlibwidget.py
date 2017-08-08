@@ -31,22 +31,24 @@ class MatplotlibWidget(Canvas):
     figure: instance of matplotlib.figure.Figure
     axes: figure axes
     """
-    def __init__(self, parent=None, title='Title', xlabel='x label', ylabel='y label', dpi=100, hold=False):
+    def __init__(self, parent=None, title='Title', xlabel='x label', ylabel='y label', 
+                width= 100, height= 100, dpi=100, hold=False):
         super(MatplotlibWidget, self).__init__(Figure())
 
         self.setParent(parent)
-        self.figure = Figure(figsize=(470, 300), dpi=dpi)
+        self.figure = Figure(figsize=(width, height), dpi=dpi)
         self.canvas = Canvas(self.figure)
-        self.theplot = self.figure.add_subplot(111)        
-        self.theplot.set_title(title)
-        self.theplot.set_xlabel(xlabel)
-        self.theplot.set_ylabel(ylabel)
+        self.theplot = self.figure.add_subplot(111)       
+        self.theplot.set_title(title, fontsize=12)
+        self.theplot.set_xlabel(xlabel, fontsize=10)
+        self.theplot.set_ylabel(ylabel, fontsize=10)
         self.theplot.grid()
         
-        Canvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        #Canvas.setSizePolicy(self, QSizePolicy.Minimum, QSizePolicy.Minimum)
         Canvas.updateGeometry(self)
 
     def plot(self, x, y, hold= False):
         self.theplot.plot(x,y)
+        self.theplot.grid()
         self.draw()  
         self.theplot.hold(hold)          

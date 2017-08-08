@@ -4,11 +4,11 @@ Created on 19 jan 2016
 @author: fragom
 '''
 import sys, os
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import uic, QtCore, QtGui
 from PyQt4.QtGui import QTreeWidgetItem
 from inout.streamcimh5 import StreamCIMH5
 from inout.streammatfile import InputMATStream
-from inout.streamcsvfile import InputCSVStream
+from processing import PMUData
 #from inout.streamoutfile import InputOUTStream
 # from matplotlib.backends.backend_qt4agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -19,12 +19,50 @@ form_gui = uic.loadUiType("./res/mae_importdata_gui.ui")[0] # Load the UI
 class UI_ImportData(QtGui.QDialog, form_gui):
     
     __results= None
+    __extensionFile= ''
+    __selectedMeasurements= None
     
-    def __init__(self, parent= None, simulationResults= None, 
+    def __init__(self, parent, simulationResults= None, 
                  exportEnabled= True, importEnabled= True):
-        QtGui.QDialog.__init__(self, parent)
+        super(UI_ImportData, self).__init__(parent)
         self.setupUi(self)
+        #
+        self.btnBrowseFolder.clicked.connect(self.__browseFolder)
+        self.buttonBox.accepted.connect(self.__acceptImport)
+        #
+        self.cbxMeasFiles.activated['QString'].connect(self.__loadByExtension)
+        #
+        self.btnChooseItems.clicked.connect(self.__chooseItems)
     
+    def __browseFolder(self):
+        carpetaName = QtGui.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        splitcName= carpetaName.split('/')
+        relativepath= './'+ splitcName[-2]+ '/'+ splitcName[-1]+ '/'
+        self.cbxMeasFiles.clear()
+        if carpetaName:
+            path= QtCore.QDir(carpetaName)
+            files= path.entryList(QtCore.QDir.Files, QtCore.QDir.Name)
+            self.cbxMeasFiles.addItems([relativepath+ f for f in files])
+        else:
+            print 'Log: Please select a folder!'
+            
+    def __loadByExtension(self, valuefile):
+        self.__extensionFile= str(valuefile).split('.')[2]
+        print self.__extensionFile
+        if self.__extensionFile== 'csv':
+            print 'Log: Import a .csv file, PMU Measurement'
+            self.__importCSV(str(valuefile))
+        elif self.__extensionFile== 'out':
+            print 'Log: Import a .out file, PSS/E output'
+            
+    def __chooseItems(self):
+        self.__selectedMeasurements = QtGui.QStandardItemModel(self.lvSelectedMeasurements)
+        getSelected = self.twMeasurements.selectedItems()
+        for item in getSelected:
+            listItem = QtGui.QStandardItem(str(item.text(0)))
+            self.__selectedMeasurements.appendRow(listItem)
+        self.lvSelectedMeasurements.setModel(self.__selectedMeasurements)
+        
 #     def __importMAT(self, itemParent=None, branches=None):
 #         ''' TODO: UI must select file '''
 #         ''' .mat files resulting from Dymola or OpenModelica simulation 
@@ -39,15 +77,25 @@ class UI_ImportData(QtGui.QDialog, form_gui):
 #             # TODO supose user only select 2 variabler per component, what if selects more?
 #             sourcemat.load_signals(componentname, variablesName)
 #    
-#     def __importCSV(self):
-#         ''' TODO: UI must select file '''
-#         sourcecsv= InputCSVStream(csvFile, delimiter)
-#         sourcecsv.load_csvHeader()
-# #         print sourcecsv.cheader
-#         measname= self.selectData(sourcecsv.header, 'Select which component data to import: ')
-#         componentname= ':'.join([measname[0].split(':')[0], measname[0].split(':')[1]])
-#         sourcecsv.load_csvValues(componentname, measname[0], measname[1])
+    def __importCSV(self, csvFile):
+        self.twMeasurements.clear()
+        self.__sourcecsv= PMUData(csvFile, ',')
+        self.__sourcecsv.load_Measurements()
+        rootItem= QTreeWidgetItem(self.twMeasurements, [csvFile])
+        for value in self.__sourcecsv.measurements:
+            childItem = QTreeWidgetItem()
+            childItem.setText(0, value)
+            rootItem.addChild(childItem)
         
+    def __acceptImport(self):
+        measSelection= []
+        if self.__extensionFile== 'csv':
+            i = 0
+            while self.__selectedMeasurements.item(i):
+                measSelection.append(self.__selectedMeasurements.item(i).text())
+                i += 1
+            #todo invoke import csv function
+            self.__sourcecsv.store_Measurements(measSelection)
 #     def __importOUT(self, binpath):
 #         ''' TODO: UI must select psse binary path '''
 #         PSSE_PATH= binpath

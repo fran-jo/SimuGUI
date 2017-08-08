@@ -9,6 +9,7 @@ from PyQt4.QtGui import QTreeWidgetItem
 from modelicares import util
 from matplotlibwidget import MatplotlibWidget
 from inout.streamcimh5 import StreamCIMH5
+from modelicares import SimRes
 
 '''TODO Import Selected variables into H5 '''
 '''TODO handel multiple selection '''
@@ -20,23 +21,45 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
     __results= None
     __dbh5api= None
     
-    def __init__(self, parent= None, simulationResults= None):
+    def __init__(self, parent= None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
-        self.mplotwidget = MatplotlibWidget(self.centralWidget)
+        self.mplotwidget = MatplotlibWidget(self.centralWidget, width= 520, height= 360, dpi= 60)
         self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 520, 380))
         self.mplotwidget.setObjectName("mplotwidget")
         #
-        self.__results= simulationResults
+#         self.__results= simulationResults
+#         arbol = util.tree(self.__results.names())
+#         self.twVariable.clear()
+#         rootItem= QTreeWidgetItem(self.twVariable, [self.__results.fbase])
+#         self.__build_tree(rootItem, arbol)
+#         self.twVariable.itemSelectionChanged.connect(self.__onSelectionChanged)
+        #
+        self.btnSaveSignals.clicked.connect(self.__saveSignals)
+        self.btnBrowseMeasurements.clicked.connect(self.__browseFolder)
+        self.cbxOutputs.activated['QString'].connect(self.__loadOutputFile)
+   
+    def __browseFolder(self):
+        carpetaName = QtGui.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        splitcName= carpetaName.split('/')
+        relativepath= './'+ splitcName[-2]+ '/'+ splitcName[-1]+ '/'
+        self.cbxOutputs.clear()
+        if carpetaName:
+            path= QtCore.QDir(carpetaName)
+            files= path.entryList(QtCore.QDir.Files, QtCore.QDir.Name)
+            self.cbxOutputs.addItems([relativepath+ f for f in files])
+        else:
+            print 'Log: Please select a folder!'
+            
+    def __loadOutputFile(self, valuefile):
+        self.__results = SimRes(str(valuefile))
         arbol = util.tree(self.__results.names())
         self.twVariable.clear()
         rootItem= QTreeWidgetItem(self.twVariable, [self.__results.fbase])
         self.__build_tree(rootItem, arbol)
         self.twVariable.itemSelectionChanged.connect(self.__onSelectionChanged)
-        #
-        self.btnSaveSignals.clicked.connect(self.__saveSignals)
-   
+    
     # This function has been copied and modified from ModelicaRes version 0.12
     # (Kevin Davies,
     # http://kdavies4.github.io/ModelicaRes/,
@@ -86,17 +109,11 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
             text += '\n' + 'displayUnit: ' + sim[name].displayUnit
             ''' TODO updated title, xAxis and yAxis labels
             TODO handle multiple signals- hold option
-            TODO plot GUI to accept HDF5 format
             TODO export to CSV '''
             self.mplotwidget.theplot.set_title('Something here')
             self.mplotwidget.theplot.set_xlabel('Time (s)')
             self.mplotwidget.theplot.set_ylabel(sim[name].description)
             self.mplotwidget.plot(sim[name].times().tolist(), sim[name].values().tolist())
-            # this line force the graph to re-draw(update) 
-            #self.mplotwidget.draw()
-#             self.mplotOuts.axes.set_ylabel(name + " / $%s$" %
-#                                  str(sim[name].unit))
-#            self.mplotOuts.axes.set_xlabel("Time / s")
         else:
             print "nothing to plot"
             

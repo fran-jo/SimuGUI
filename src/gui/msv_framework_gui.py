@@ -83,9 +83,9 @@ class MVSGUI(QtGui.QMainWindow, main_form):
     def plotSimulation(self, checked=None):
         if checked== None: return
         #debug
-        simmodel = SimRes('./res/dy/Two_Areas_PSSE_AVR_Noise_dassl_dsin.mat')
+#         simmodel = SimRes('./res/dy/Two_Areas_PSSE_AVR_Noise_dassl_dsin.mat')
 #         simmodel.browse()
-        simbrowser = UI_Plot_MEE(self, simmodel)
+        simbrowser = UI_Plot_MEE(self)
         simbrowser.setWindowTitle('Simulations')
         simbrowser.show() 
     

@@ -8,6 +8,7 @@ from PyQt4 import QtGui, uic, QtCore
 from PyQt4.QtGui import QTreeWidgetItem
 from matplotlibwidget import MatplotlibWidget
 from inout.streamcimh5 import StreamCIMH5
+from mae_importdata_gui import UI_ImportData
 
 '''TODO Import Selected variables into H5 '''
 '''TODO handel multiple selection '''
@@ -19,12 +20,12 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
     __measurements= None
     __dbh5api= None
     
-    def __init__(self, parent= None):
-        QtGui.QDialog.__init__(self, parent)
+    def __init__(self, parent):
+        super(UI_Plot_MAE, self).__init__(parent)
         self.setupUi(self)
         self.load_h5db()
         #
-        self.mplotwidget = MatplotlibWidget(self.centralWidget)
+        self.mplotwidget = MatplotlibWidget(self.centralWidget, width= 520, height= 360, dpi= 60)
         self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 520, 380))
         self.mplotwidget.setObjectName("mplotwidget")
         #
@@ -33,17 +34,20 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
         self.cbxMeasurements.activated['QString'].connect(self.__loadSignals)
         #
         self.btnLoadSignals.clicked.connect(self.__loadSignals)
+        #
+        self.btnImportMeasurements.clicked.connect(self.__openImportDialog)
+
             
     def load_h5db(self):
         fsm = QtGui.QFileSystemModel()
-        index = fsm.setRootPath("./db/signals")
+        index = fsm.setRootPath("./db/measurements")
         self.cbxMeasurements.setModel(fsm)
         self.cbxMeasurements.setRootModelIndex(index)
     
     def __loadSignals(self, text):
         ''' load signals from the h5 database '''
         self.__measurements= str(text) #h5 file name 
-        self.__dbh5api= StreamCIMH5('./db/signals', self.__measurements)
+        self.__dbh5api= StreamCIMH5('./db/measurements', self.__measurements)
         self.__dbh5api.open(self.__measurements, mode= 'r')
         # TODO select model, root group h5
         self.twVariable.clear()
@@ -80,8 +84,6 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
         if self.__dbh5api.exist_PowerSystemResource(splitName[-2]):
             self.__dbh5api.select_PowerSystemResource(splitName[-2])
             senyal= self.__dbh5api.select_AnalogMeasurement(splitName[-1])
-            ''' TODO updated title, xAxis and yAxis labels
-            TODO export to CSV '''
             self.mplotwidget.theplot.set_title('Something here')
             self.mplotwidget.theplot.set_xlabel('Time (s)')
             self.mplotwidget.theplot.set_ylabel('Magnitude (unit)')
@@ -90,5 +92,9 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
             print "nothing to plot"
         # TODO select analog measurement and analogvalue
         # TODO use pycim to store psres and am and av
-        
+    
+    def __openImportDialog(self):
+        importdialog = UI_ImportData(self)
+        importdialog.setWindowTitle('Import Measurements to DB')
+        importdialog.show() 
         

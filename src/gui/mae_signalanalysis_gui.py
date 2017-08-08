@@ -7,7 +7,6 @@ Created on 19 jan 2016
 import os
 from PyQt4 import QtGui, uic, QtCore
 from PyQt4.QtGui import QTreeWidgetItem
-from modelicares import util, SimRes
 from matplotlibwidget import MatplotlibWidget
 from inout.streamcimh5 import StreamCIMH5
 from methods import MethodAmbientAnalysis
@@ -16,15 +15,17 @@ __form_gui = uic.loadUiType("./res/mae_signalanalysis_gui.ui")[0] # Load the UI
 
 class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
     
-    __outputSignal= None
-    __measurements= None
+    __simulation= None
+    __measurement= None
+    __h5simuapi= None
+    __h5measapi= None
     
-    def __init__(self, parent= None, simulationResults= None):
+    def __init__(self, parent= None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
-        self.mplotwidget = MatplotlibWidget(self.mplotWidget)
-        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 470, 312))
+        self.mplotwidget = MatplotlibWidget(self.mplotWidget, width= 440, height= 290, dpi= 60)
+        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 440, 312))
         self.mplotwidget.setObjectName("mplotSimwidget")
         #
         self.cbxOutputs.activated['QString'].connect(self.__load_OutputSignals)
@@ -36,100 +37,60 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         self.btnBasicMethod.clicked.connect(self.onStart_basicMethod)
         
     def onLoad_populateOutputFiles(self):
-        ''' list in the combobox all the outputs files from Dy, OMC, JM '''
-        ''' files from DY '''
-        path= QtCore.QDir('./res/dy')
+        ''' List in the combobox all the outputs files from the database of Dy, OMC, JM results 
+        .h5 files
+        '''
+        path= QtCore.QDir('./db/simulation')
         files= path.entryList(QtCore.QDir.Files, QtCore.QDir.Name)
-        self.cbxOutputs.addItems(['./res/dy/'+ f for f in files])
-        ''' files from OMC '''
-        path= QtCore.QDir('./res/omc')
-        files= path.entryList(QtCore.QDir.Files, QtCore.QDir.Name)
-        self.cbxOutputs.addItems(['./res/omc/'+ f for f in files])
+        self.cbxOutputs.addItems(files)
         
     def onLoad_populateMeasurements(self):
-        ''' list in the combobox all the outputs files from H5'''
-        path= QtCore.QDir('./db/signals')
+        ''' list in the combobox all the measurement files from the database
+        .h5 files'''
+        path= QtCore.QDir('./db/measurements')
         files= path.entryList(QtCore.QDir.Files, QtCore.QDir.Name)
         self.cbxMeasurements.addItems(files)
         
-    # This function has been copied and modified from ModelicaRes version 0.12
-    # (Kevin Davies,
-    # http://kdavies4.github.io/ModelicaRes/,
-    # BSD License)
-    def __load_OutputSignals(self, outputmatfile):
-        '''
-        open mat file and populate variables  
-        '''
-        self.__results= SimRes(str(outputmatfile))
-        arbol = util.tree(self.__results.names())
+    def __load_OutputSignals(self, simulationh5):
+        '''' load signals from the h5 database '''
+        self.__h5simuapi= StreamCIMH5('./db/simulation', str(simulationh5))
+        self.__h5simuapi.open(str(simulationh5), mode= 'r')
+        # TODO select model, root group h5
         self.twOutVariable.clear()
-        rootItem= QTreeWidgetItem(self.twOutVariable, [self.__results.fbase])
-        self.__build_tree(rootItem, arbol)
+        rootItem= QTreeWidgetItem(self.twOutVariable, [self.__h5simuapi.select_Model()])
+        arbolMedidas= self.__h5simuapi.select_AllGroup(self.__h5simuapi.select_Model())
+        for psres in arbolMedidas:
+            itemParent= QTreeWidgetItem()
+            itemParent.setText(0,unicode(psres))
+            for psmeas in arbolMedidas[psres]:
+                childItem = QTreeWidgetItem()
+                childItem.setText(0, unicode(psmeas))
+                itemParent.addChild(childItem)
+            rootItem.addChild(itemParent)
         self.twOutVariable.itemSelectionChanged.connect(self.__twOutVariable_onSelectionChanged)
     
-    # This function has been copied and modified from ModelicaRes version 0.12
-    # (Kevin Davies,
-    # http://kdavies4.github.io/ModelicaRes/,
-    # BSD License).
-    def __build_tree(self, itemParent=None, branches=None):
-        #itemParent.setExpanded(True)
-        if type(branches) is dict:
-            for key, val in sorted(branches.iteritems()):
-                childItem = QTreeWidgetItem()
-                childItem.setText(0, unicode(key))
-                itemParent.addChild(childItem)
-                if type(val) is dict:
-                    self.__build_tree(childItem, val)
-        else:
-            childItem = QTreeWidgetItem()
-            childItem.setText(0, unicode(branches))
-            itemParent.addChild(childItem)
-    
     def __twOutVariable_onSelectionChanged(self):
-        """Update the variable's attributes and plot.
-        """
+        '''
+        Update the variable's attributes and plot
+        '''
         getSelected = self.twOutVariable.selectedItems()
         if getSelected:
             baseNode = getSelected[0]
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
-            if baseNode.parent().parent()!= None:
-                grandpaName= str(baseNode.parent().parent().text(0))
-            if grandpaName== self.__results.fbase:
-                paramName= parentName+ '.'+ childName
-            else:
-                paramName= grandpaName+ '.'+ parentName+ '.'+ childName
-        self.__view_Signal(str(paramName), self.__results)
-    
-    # This function has been copied and modified from ModelicaRes version 0.12
-    # (Kevin Davies,
-    # http://kdavies4.github.io/ModelicaRes/,
-    # BSD License)
-    def __view_Signal(self, name, sim):
-        '''Show the variable's attributes and a small plot.
-        fix it using the matplotlibwidget
-        Using ModelicaRes for ploting simulation signals'''
-        if name:
-            text = 'Name: ' + name
-            text += '\n' + 'Description: ' + sim[name].description
-            text += '\n' + 'unit: ' + sim[name].unit
-            text += '\n' + 'displayUnit: ' + sim[name].displayUnit
-            self.mplotwidget.theplot.set_title('Something here')
-            self.mplotwidget.theplot.set_xlabel('Time (s)')
-            self.mplotwidget.theplot.set_ylabel(sim[name].description)
-            self.mplotwidget.plot(sim[name].times().tolist(), sim[name].values().tolist())
-        else:
-            print "nothing to plot"
+        if self.__h5simuapi.exist_PowerSystemResource(str(parentName)):
+            self.__h5simuapi.select_PowerSystemResource(str(parentName))
+            self.__simulation= self.__h5simuapi.select_AnalogMeasurement(str(childName))
+        self.__view_Measurement(self.__simulation, hold= True)
 
     def __load_Measurements(self, dbh5file):
         ''' load signals from the h5 database '''
-        self.__measurements= str(dbh5file) #h5 file name 
-        self.__dbh5api= StreamCIMH5('./db/signals', self.__measurements)
-        self.__dbh5api.open(self.__measurements, mode= 'r')
+        self.__h5measapi= StreamCIMH5('./db/measurements', str(dbh5file))
+        self.__h5measapi.open(str(dbh5file), mode= 'r')
         # TODO select model, root group h5
         self.twMeasVariable.clear()
-        rootItem= QTreeWidgetItem(self.twMeasVariable, [self.__dbh5api.select_Model()])
-        arbolMedidas= self.__dbh5api.select_AllGroup(self.__dbh5api.select_Model())
+        rootItem= QTreeWidgetItem(self.twMeasVariable, [self.__h5measapi.select_Model()])
+        arbolMedidas= self.__h5measapi.select_AllGroup(self.__h5measapi.select_Model())
         for psres in arbolMedidas:
             itemParent= QTreeWidgetItem()
             itemParent.setText(0,unicode(psres))
@@ -149,45 +110,43 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
             baseNode = getSelected[0]
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
-            paramName= parentName+ '.'+ childName
-        self.__view_Measurement(str(paramName))
+        if self.__h5measapi.exist_PowerSystemResource(str(parentName)):
+            self.__h5measapi.select_PowerSystemResource(str(parentName))
+            self.__measurement= self.__h5measapi.select_AnalogMeasurement(str(childName))
+        self.__view_Measurement(self.__measurement, hold= False)
         
-    def __view_Measurement(self, name):
+    def __view_Measurement(self, measurement, hold= False):
         '''Show the variable's attributes and a small plot. fix it using the matplotlibwidget
         Using H5 database for ploting measurement signals'''
-        splitName= name.split('.')
-        print '%s.%s' % (splitName[-2], splitName[-1])
-        if self.__dbh5api.exist_PowerSystemResource(splitName[-2]):
-            self.__dbh5api.select_PowerSystemResource(splitName[-2])
-            self.__measurement= self.__dbh5api.select_AnalogMeasurement(splitName[-1])
 #             text = 'Name: ' + senyal['unitSymbol']
 #             text += '\n' + 'Description: ' + senyal['unitMultiplier']
 #             text += '\n' + 'unit: ' + senyal['measurementType']
 #             text += '\n' + 'displayUnit: ' + senyal['measurementType']
-            ''' TODO updated title, xAxis and yAxis labels
-            TODO handle multiple signals- hold option
-            TODO plot GUI to accept HDF5 format
-            TODO export to CSV '''
-            self.mplotwidget.theplot.set_title('Something here')
-            self.mplotwidget.theplot.set_xlabel('Time (s)')
-            self.mplotwidget.theplot.set_ylabel('Magnitude (unit)')
-            self.mplotwidget.plot(self.__measurement['sampleTime'], self.__measurement['magnitude'])
-        else:
-            print "nothing to plot"
+        ''' TODO updated title, xAxis and yAxis labels
+        TODO handle multiple signals- hold option
+        TODO plot GUI to accept HDF5 format
+        TODO export to CSV '''
+        self.mplotwidget.theplot.set_title('Something here')
+        self.mplotwidget.theplot.set_xlabel('Time (s)')
+        self.mplotwidget.theplot.set_ylabel('Magnitude (unit)')
+        self.mplotwidget.plot(measurement['sampleTime'], measurement['magnitude'], hold)
 
     # Analysis Engine Methods
     def onStart_basicMethod(self):
-        '''TODO: selected measurement from modelica outputs '''
-        self.__analysisTask = MethodAmbientAnalysis(self.__measurement['magnitude'])
+        self.__analysisTask = MethodAmbientAnalysis(self.__simulation['magnitude'], 
+                                                    self.__measurement['magnitude'])
         self.__analysisTask.toolDir= os.getcwd()
         self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)
         self.__analysisTask.start()
+        #debug code
+        self.onFinish_basicMethod()
             
     def onFinish_basicMethod(self):
         ''' TODO: show the results on the text area / table '''
         os.chdir(self.__analysisTask.toolDir)
         self.__analysisTask.gather_EigenValues()
-        print self.__analysisTask.modes
+        print self.__analysisTask.simulationModes
+        print self.__analysisTask.__measurementModes
         ''' TODO: first use the mode_estimation_res.h5 directly '''
         ''' TODO: second, use the whole workflow '''
         
