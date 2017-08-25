@@ -25,9 +25,13 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
-        self.mplotwidget = MatplotlibWidget(self.mplotWidget, width= 440, height= 290, dpi= 60)
-        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 440, 312))
-        self.mplotwidget.setObjectName("mplotSimwidget")
+        self.plotSimu = MatplotlibWidget(self.mplotSimulation, width= 440, height= 290, dpi= 60)
+        self.plotSimu.setGeometry(QtCore.QRect(0, 0, 440, 312))
+        self.plotSimu.setObjectName("mplotSimwidget")
+        self.plotMeas = MatplotlibWidget(self.mplotMeasurements, width= 440, height= 290, dpi= 60)
+        self.plotMeas.setGeometry(QtCore.QRect(0, 0, 440, 312))
+        self.plotMeas.setObjectName("mplotMeaswidget")
+        
         #
         self.cbxOutputs.activated['QString'].connect(self.__load_OutputSignals)
         self.onLoad_populateOutputFiles()
@@ -85,7 +89,7 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         if self.__h5simuapi.exist_PowerSystemResource(str(parentName)):
             self.__h5simuapi.select_PowerSystemResource(str(parentName))
             self.__simulation= self.__h5simuapi.select_AnalogMeasurement(str(childName))
-        self.__view_Measurement(self.__simulation, hold= True)
+        self.__view_Measurement(self.plotSimu, self.__simulation, hold= False)
 
     def __load_Measurements(self, dbh5file):
         ''' load signals from the h5 database '''
@@ -117,9 +121,9 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         if self.__h5measapi.exist_PowerSystemResource(str(parentName)):
             self.__h5measapi.select_PowerSystemResource(str(parentName))
             self.__measurement= self.__h5measapi.select_AnalogMeasurement(str(childName))
-        self.__view_Measurement(self.__measurement, hold= False)
+        self.__view_Measurement(self.plotMeas, self.__measurement, hold= False)
         
-    def __view_Measurement(self, measurement, hold= False):
+    def __view_Measurement(self, ptwidget, measurement, hold= False):
         '''Show the variable's attributes and a small plot. fix it using the matplotlibwidget
         Using H5 database for ploting measurement signals'''
 #             text = 'Name: ' + senyal['unitSymbol']
@@ -130,10 +134,10 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         TODO handle multiple signals- hold option
         TODO plot GUI to accept HDF5 format
         TODO export to CSV '''
-        self.mplotwidget.theplot.set_title('Something here')
-        self.mplotwidget.theplot.set_xlabel('Time (s)')
-        self.mplotwidget.theplot.set_ylabel('Magnitude (unit)')
-        self.mplotwidget.plot(measurement['sampleTime'], measurement['magnitude'], hold)
+        ptwidget.theplot.set_title('Something here')
+        ptwidget.theplot.set_xlabel('Time (s)')
+        ptwidget.theplot.set_ylabel('Magnitude (unit)')
+        ptwidget.plot(measurement['sampleTime'], measurement['magnitude'], hold)
 
     # Analysis Engine Methods
     def onStart_basicMethod(self):
@@ -143,7 +147,11 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)
         self.__analysisTask.start()
         #debug code
+<<<<<<< Updated upstream
 #         self.onFinish_basicMethod()
+=======
+        #self.onFinish_basicMethod()
+>>>>>>> Stashed changes
             
     def onFinish_basicMethod(self):
         ''' TODO: show the results on the text area / table '''

@@ -133,7 +133,7 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
                 paramName= parentName+ '.'+ childName
             else:
                 paramName= grandpaName+ '.'+ parentName+ '.'+ childName
-        dbh5api= StreamCIMH5('./db/signals', self.__results.fbase)
+        dbh5api= StreamCIMH5('./db/simulation', self.__results.fbase)
         dbh5api.open(self.__results.fbase, mode= 'a')
         if not dbh5api.exist_PowerSystemResource(str(parentName)):
             dbh5api.add_PowerSystemResource(str(parentName))
