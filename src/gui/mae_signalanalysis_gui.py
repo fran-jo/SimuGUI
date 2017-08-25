@@ -143,15 +143,12 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
     def onStart_basicMethod(self):
         self.__analysisTask = MethodAmbientAnalysis(self.__simulation['magnitude'], 
                                                     self.__measurement['magnitude'])
+        self.__analysisTask.order= str(self.txtOrder.text())
         self.__analysisTask.toolDir= os.getcwd()
         self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)
         self.__analysisTask.start()
         #debug code
-<<<<<<< Updated upstream
-#         self.onFinish_basicMethod()
-=======
         #self.onFinish_basicMethod()
->>>>>>> Stashed changes
             
     def onFinish_basicMethod(self):
         ''' TODO: show the results on the text area / table '''

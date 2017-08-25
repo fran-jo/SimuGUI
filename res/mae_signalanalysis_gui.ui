@@ -124,7 +124,6 @@
      <string>Mode Estimation</string>
     </attribute>
     <layout class="QGridLayout" name="gridLayout">
-<<<<<<< Updated upstream
      <item row="0" column="0">
       <widget class="QPushButton" name="btnBasicMethod">
        <property name="sizePolicy">
@@ -158,10 +157,6 @@
      </item>
      <item row="0" column="1" rowspan="5">
       <widget class="QTableWidget" name="tbwAnalysisRes">
-=======
-     <item row="0" column="1" rowspan="2">
-      <widget class="QTableWidget" name="tableWidget_2">
->>>>>>> Stashed changes
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
          <horstretch>0</horstretch>
@@ -310,10 +305,8 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
-<<<<<<< Updated upstream
-=======
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
         <string>Simulation Outputs</string>
@@ -380,7 +373,6 @@
         </property>
        </widget>
       </widget>
->>>>>>> Stashed changes
      </widget>
     </item>
     <item>
