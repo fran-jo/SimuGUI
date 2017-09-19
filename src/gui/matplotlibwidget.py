@@ -1,5 +1,5 @@
 from PyQt4.QtGui import QSizePolicy
-
+from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as Canvas
 from matplotlib.figure import Figure
 
@@ -30,7 +30,7 @@ class MatplotlibWidget(Canvas):
     -----------------
     figure: instance of matplotlib.figure.Figure
     axes: figure axes
-    """
+    """    
     def __init__(self, parent=None, title='Title', xlabel='x label', ylabel='y label', 
                 width= 100, height= 100, dpi=100, hold=False):
         super(MatplotlibWidget, self).__init__(Figure())
@@ -43,6 +43,7 @@ class MatplotlibWidget(Canvas):
         self.theplot.set_xlabel(xlabel, fontsize=10)
         self.theplot.set_ylabel(ylabel, fontsize=10)
         self.theplot.grid()
+        self.theplot.hold(hold)
         
         #Canvas.setSizePolicy(self, QSizePolicy.Minimum, QSizePolicy.Minimum)
         Canvas.updateGeometry(self)
@@ -51,4 +52,8 @@ class MatplotlibWidget(Canvas):
         self.theplot.plot(x,y)
         self.theplot.grid()
         self.draw()  
-        self.theplot.hold(hold)          
+          
+    def clear(self):
+        self.theplot.cla()
+        self.theplot.grid()
+        self.draw()

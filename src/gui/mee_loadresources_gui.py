@@ -14,6 +14,7 @@ class UI_LoadSources(QtGui.QDialog, form_gui):
     '''
     defaultsourcesFile='./config/simResources.properties'
     modellist=[]
+    __simsource= None
     
     def __init__(self, parent= None):
         QtGui.QDialog.__init__(self, parent)

@@ -6,3 +6,4 @@ from mae_plot_gui import UI_Plot_MAE
 from msv_m2m_gui import UI_M2M
 from mae_signalanalysis_gui import UI_SignalAnalysis
 from mae_importdata_gui import UI_ImportData
+from mee_linearization_gui import UI_Linearization

@@ -18,7 +18,7 @@ from modelicares import SimRes
 form_gui = uic.loadUiType("./res/mee_plot_gui.ui")[0] # Load the UI
 
 class UI_Plot_MEE(QtGui.QDialog, form_gui):
-    
+    keyPressed= QtCore.pyqtSignal()
     __results= None
     __dbh5api= None
     
@@ -26,8 +26,8 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
-        self.mplotwidget = MatplotlibWidget(self.centralWidget, width= 520, height= 360, dpi= 60)
-        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 520, 380))
+        self.mplotwidget = MatplotlibWidget(self.centralWidget, width= 590, height= 380, dpi= 60)
+        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 590, 380))
         self.mplotwidget.setObjectName("mplotwidget")
         #
 #         self.__results= simulationResults
@@ -40,7 +40,11 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
         self.btnSaveSignals.clicked.connect(self.__saveSignals)
         self.btnBrowseMeasurements.clicked.connect(self.__browseFolder)
         self.cbxOutputs.activated['QString'].connect(self.__loadOutputFile)
-   
+        
+    def keyPressEvent(self, event):
+        if event.key()== QtCore.Qt.Key_Backspace:
+            self.mplotwidget.clear()
+    
     def __browseFolder(self):
         carpetaName = QtGui.QFileDialog.getExistingDirectory(self, 'Select Folder')
         if platform.system()== 'Windows':
@@ -54,6 +58,7 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
             self.cbxOutputs.addItems([relativepath+ f for f in files])
         else:
             print 'Log: Please select a folder!'
+        self.cbxOutputs.setFocus()
             
     def __loadOutputFile(self, valuefile):
         self.__results = SimRes(str(valuefile))
@@ -95,13 +100,14 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
                 paramName= parentName+ '.'+ childName
             else:
                 paramName= grandpaName+ '.'+ parentName+ '.'+ childName
+        
         self.__view_Signal(str(paramName), self.__results)
         
     # This function has been copied and modified from ModelicaRes version 0.12
     # (Kevin Davies,
     # http://kdavies4.github.io/ModelicaRes/,
     # BSD License)
-    def __view_Signal(self, name, sim):
+    def __view_Signal(self, name, sim, event= None):
         '''Show the variable's attributes and a small plot.
         fix it using the matplotlibwidget
         Using ModelicaRes for ploting simulation signals'''

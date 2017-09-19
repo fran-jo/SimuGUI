@@ -3,6 +3,7 @@
 	<name>SimuGUI</name>
 	<comment></comment>
 	<projects>
+		<project>PyCIM</project>
 		<project>ScriptMAE</project>
 		<project>ScriptMEE</project>
 	</projects>

@@ -8,7 +8,8 @@ import sys
 from PyQt4 import QtGui, uic
 from PyQt4.QtCore import QSize
 from PyQt4.QtGui import QApplication, QIcon
-from gui import UI_LoadSources, UI_ConfigSolver, UI_Simulation, UI_Plot_MEE, UI_Plot_MAE, UI_M2M, UI_SignalAnalysis
+from gui import UI_LoadSources, UI_ConfigSolver, UI_Simulation, UI_Linearization
+from gui import UI_Plot_MEE, UI_Plot_MAE, UI_M2M, UI_SignalAnalysis
 from modelicares import SimRes
 #debug
 from ctrl import SimulationResources
@@ -76,9 +77,19 @@ class MVSGUI(QtGui.QMainWindow, main_form):
 #         self.simulationDialog = UI_Simulation(
 #             self, SimulationResources(['./config/simResources.properties','r+']), 
 #             SimulationConfigOMCDY(['./config/simConfigurationOMC.properties','w']))
-        self.simulattionDialog = UI_Simulation(self, self.sourcesDialog.simulationResources, 
+        self.simulationDialog = UI_Simulation(self, self.sourcesDialog.simulationResources, 
                                                self.configSolver.simulationConfiguration)
         self.simulationDialog.show()
+        
+    def linearizeDialog(self, checked=None):
+        if checked== None: return
+        #debug
+        ''' TODO change debug object, use loaded configurations '''
+#         self.simulationDialog = UI_Simulation(
+#             self, SimulationResources(['./config/simResources.properties','r+']), 
+#             SimulationConfigOMCDY(['./config/simConfigurationOMC.properties','w']))
+        self.linDialog = UI_Linearization(self, self.configSolver.simulationConfiguration)
+        self.linDialog.show()
         
     def plotSimulation(self, checked=None):
         if checked== None: return

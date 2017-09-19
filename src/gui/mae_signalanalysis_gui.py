@@ -9,7 +9,7 @@ from PyQt4 import QtGui, uic, QtCore
 from PyQt4.QtCore import QString
 from PyQt4.QtGui import QTreeWidgetItem
 from matplotlibwidget import MatplotlibWidget
-from inout.streamcimh5 import StreamCIMH5
+from inout.streamh5cim import StreamH5CIM
 from methods import MethodAmbientAnalysis
 
 __form_gui = uic.loadUiType("./res/mae_signalanalysis_gui.ui")[0] # Load the UI
@@ -18,18 +18,18 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
     
     __simulation= None
     __measurement= None
-    __h5simuapi= None
-    __h5measapi= None
+    __simudb= None
+    __measdb= None
     
     def __init__(self, parent= None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
-        self.plotSimu = MatplotlibWidget(self.mplotSimulation, width= 440, height= 290, dpi= 60)
-        self.plotSimu.setGeometry(QtCore.QRect(0, 0, 440, 312))
+        self.plotSimu = MatplotlibWidget(self.mplotSimulation, width= 410, height= 290, dpi= 60)
+        self.plotSimu.setGeometry(QtCore.QRect(0, 0, 410, 290))
         self.plotSimu.setObjectName("mplotSimwidget")
-        self.plotMeas = MatplotlibWidget(self.mplotMeasurements, width= 440, height= 290, dpi= 60)
-        self.plotMeas.setGeometry(QtCore.QRect(0, 0, 440, 312))
+        self.plotMeas = MatplotlibWidget(self.mplotMeasurements, width= 410, height= 290, dpi= 60)
+        self.plotMeas.setGeometry(QtCore.QRect(0, 0, 410, 290))
         self.plotMeas.setObjectName("mplotMeaswidget")
         
         #
@@ -61,12 +61,12 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         
     def __load_OutputSignals(self, simulationh5):
         '''' load signals from the h5 database '''
-        self.__h5simuapi= StreamCIMH5('./db/simulation', str(simulationh5))
-        self.__h5simuapi.open(str(simulationh5), mode= 'r')
+        self.__simudb= StreamH5CIM('./db/simulation', str(simulationh5))
+        self.__simudb.open(str(simulationh5), mode= 'r')
         # TODO select model, root group h5
         self.twOutVariable.clear()
-        rootItem= QTreeWidgetItem(self.twOutVariable, [self.__h5simuapi.select_Model()])
-        arbolMedidas= self.__h5simuapi.select_AllGroup(self.__h5simuapi.select_Model())
+        rootItem= QTreeWidgetItem(self.twOutVariable, [self.__simudb.modelName])
+        arbolMedidas= self.__simudb.select_treeMeasurements(self.__simudb.modelName)
         for psres in arbolMedidas:
             itemParent= QTreeWidgetItem()
             itemParent.setText(0,unicode(psres))
@@ -86,19 +86,20 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
             baseNode = getSelected[0]
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
-        if self.__h5simuapi.exist_PowerSystemResource(str(parentName)):
-            self.__h5simuapi.select_PowerSystemResource(str(parentName))
-            self.__simulation= self.__h5simuapi.select_AnalogMeasurement(str(childName))
+        if self.__simudb.exist_PowerSystemResource(str(parentName)):
+            self.__simudb.select_PowerSystemResource(str(parentName))
+            self.__simudb.select_AnalogMeasurement(str(childName))
+            self.__simulation= self.__simudb.analogMeasurementValues
         self.__view_Measurement(self.plotSimu, self.__simulation, hold= False)
 
     def __load_Measurements(self, dbh5file):
         ''' load signals from the h5 database '''
-        self.__h5measapi= StreamCIMH5('./db/measurements', str(dbh5file))
-        self.__h5measapi.open(str(dbh5file), mode= 'r')
+        self.__measdb= StreamH5CIM('./db/measurements', str(dbh5file))
+        self.__measdb.open(str(dbh5file), mode= 'r')
         # TODO select model, root group h5
         self.twMeasVariable.clear()
-        rootItem= QTreeWidgetItem(self.twMeasVariable, [self.__h5measapi.select_Model()])
-        arbolMedidas= self.__h5measapi.select_AllGroup(self.__h5measapi.select_Model())
+        rootItem= QTreeWidgetItem(self.twMeasVariable, [self.__measdb.modelName])
+        arbolMedidas= self.__measdb.select_treeMeasurements(self.__measdb.modelName)
         for psres in arbolMedidas:
             itemParent= QTreeWidgetItem()
             itemParent.setText(0,unicode(psres))
@@ -118,9 +119,10 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
             baseNode = getSelected[0]
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
-        if self.__h5measapi.exist_PowerSystemResource(str(parentName)):
-            self.__h5measapi.select_PowerSystemResource(str(parentName))
-            self.__measurement= self.__h5measapi.select_AnalogMeasurement(str(childName))
+        if self.__measdb.exist_PowerSystemResource(str(parentName)):
+            self.__measdb.select_PowerSystemResource(str(parentName))
+            self.__measdb.select_AnalogMeasurement(str(childName))
+            self.__measurement= self.__measdb.analogMeasurementValues
         self.__view_Measurement(self.plotMeas, self.__measurement, hold= False)
         
     def __view_Measurement(self, ptwidget, measurement, hold= False):
@@ -132,7 +134,6 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
 #             text += '\n' + 'displayUnit: ' + senyal['measurementType']
         ''' TODO updated title, xAxis and yAxis labels
         TODO handle multiple signals- hold option
-        TODO plot GUI to accept HDF5 format
         TODO export to CSV '''
         ptwidget.theplot.set_title('Something here')
         ptwidget.theplot.set_xlabel('Time (s)')
@@ -141,17 +142,12 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
 
     # Analysis Engine Methods
     def onStart_basicMethod(self):
+        self.tbwAnalysisRes.setRowCount(0)
         self.__analysisTask = MethodAmbientAnalysis(self.__simulation['magnitude'], 
                                                     self.__measurement['magnitude'])
         self.__analysisTask.toolDir= os.getcwd()
         self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)
         self.__analysisTask.start()
-        #debug code
-<<<<<<< Updated upstream
-#         self.onFinish_basicMethod()
-=======
-        #self.onFinish_basicMethod()
->>>>>>> Stashed changes
             
     def onFinish_basicMethod(self):
         ''' TODO: show the results on the text area / table '''
