@@ -8,7 +8,7 @@ from PyQt4 import uic, QtCore, QtGui
 from PyQt4.QtGui import QTreeWidgetItem
 from inout.streamcimh5 import StreamCIMH5
 from inout.streammatfile import InputMATStream
-from processing import PMUData
+from inout.streamcsvh5 import InputCSVH5
 #from inout.streamoutfile import InputOUTStream
 # from matplotlib.backends.backend_qt4agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -81,8 +81,8 @@ class UI_ImportData(QtGui.QDialog, form_gui):
 #    
     def __importCSV(self, csvFile):
         self.twMeasurements.clear()
-        self.__sourcecsv= PMUData(csvFile, ',')
-        self.__sourcecsv.load_Measurements()
+        self.__sourcecsv= InputCSVH5(csvFile, ',')
+        self.__sourcecsv.load_csvHeader()
         rootItem= QTreeWidgetItem(self.twMeasurements, [csvFile])
         for value in self.__sourcecsv.measurements:
             childItem = QTreeWidgetItem()

@@ -80,10 +80,12 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
         '''Show the variable's attributes and a small plot. fix it using the matplotlibwidget
         Using H5 database for ploting measurement signals'''
         splitName= name.split('.')
-        print '%s.%s' % (splitName[-2], splitName[-1])
-        if self.__dbh5api.exist_PowerSystemResource(splitName[-2]):
-            self.__dbh5api.select_PowerSystemResource(splitName[-2])
-            self.__dbh5api.select_AnalogMeasurement(splitName[-1])
+        componentname= splitName[-3] if len(splitName)== 3 else splitName[-2]
+        variablename= splitName[-2]+ '.'+ splitName[-1] if len(splitName)== 3 else splitName[-1]
+        print '%s.%s' % (componentname, variablename)
+        if self.__dbh5api.exist_PowerSystemResource(componentname):
+            self.__dbh5api.select_PowerSystemResource(componentname)
+            self.__dbh5api.select_AnalogMeasurement(variablename)
             self.mplotwidget.theplot.set_title('Something here')
             self.mplotwidget.theplot.set_xlabel('Time (s)')
             self.mplotwidget.theplot.set_ylabel('Magnitude (unit)')

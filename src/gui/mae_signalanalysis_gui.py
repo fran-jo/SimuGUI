@@ -31,7 +31,6 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         self.plotMeas = MatplotlibWidget(self.mplotMeasurements, width= 410, height= 290, dpi= 60)
         self.plotMeas.setGeometry(QtCore.QRect(0, 0, 410, 290))
         self.plotMeas.setObjectName("mplotMeaswidget")
-        
         #
         self.cbxOutputs.activated['QString'].connect(self.__load_OutputSignals)
         self.onLoad_populateOutputFiles()
@@ -140,17 +139,17 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         ptwidget.theplot.set_ylabel('Magnitude (unit)')
         ptwidget.plot(measurement['sampleTime'], measurement['magnitude'], hold)
 
-    # Analysis Engine Methods
     def onStart_basicMethod(self):
+        print "campamento"
         self.tbwAnalysisRes.setRowCount(0)
         self.__analysisTask = MethodAmbientAnalysis(self.__simulation['magnitude'], 
                                                     self.__measurement['magnitude'])
+        self.__analysisTask.order= str(self.txtOrder.text())
         self.__analysisTask.toolDir= os.getcwd()
         self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)
         self.__analysisTask.start()
             
     def onFinish_basicMethod(self):
-        ''' TODO: show the results on the text area / table '''
         os.chdir(self.__analysisTask.toolDir)
         self.__analysisTask.gather_EigenValues()
         for mode in self.__analysisTask.simulationModes:
