@@ -38,7 +38,8 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         self.cbxMeasurements.activated['QString'].connect(self.__load_Measurements)
         self.onLoad_populateMeasurements()
         #
-        self.btnBasicMethod.clicked.connect(self.onStart_basicMethod)
+        #self.btnBasicMethod.clicked.connect(self.onStart_basicMethod)
+        self.btn_basicMethod.clicked.connect(self.onStart_basicMethod)
         # table of analysis results
         self.tbwAnalysisRes.setColumnCount(5)
         self.tbwAnalysisRes.setHorizontalHeaderLabels(QString(" ;Sim Freq.;Sim Damp.;Meas Freq..;Meas Damp.").split(";"))
@@ -140,7 +141,7 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         ptwidget.plot(measurement['sampleTime'], measurement['magnitude'], hold)
 
     def onStart_basicMethod(self):
-        print "campamento"
+        print str(self.txtOrder.text())
         self.tbwAnalysisRes.setRowCount(0)
         self.__analysisTask = MethodAmbientAnalysis(self.__simulation['magnitude'], 
                                                     self.__measurement['magnitude'])

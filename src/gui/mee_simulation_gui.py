@@ -42,14 +42,14 @@ class UI_Simulation(QtGui.QDialog, form_gui):
         self.btnPlot.setIconSize(QSize(48,48))
         self.btnPlot.clicked.connect(self.browse_simulation)
         #debug
-#         self.__omcSession= OMCSession()
-#         if self.__simconfig.compiler== 'dymola':
-#             self.__simulationTask = TaskThreadDY(self, self.__simsource, self.__simconfig, self.__results)
-#         elif self.__simconfig.compiler== 'jmodelica':
-#             pass
-#         elif self.__simconfig.compiler== 'openmodelica':
-#             self.__simulationTask = TaskThreadOMC(self, self.__simsource, self.__simconfig, self.__omcSession, self.__results)
-#         self.__simulationTask.taskFinished.connect(self.onFinishSimulation)
+        self.__omcSession= OMCSession()
+        if self.__simconfig.compiler== 'dymola':
+            self.__simulationTask = TaskThreadDY(self, self.__simsource, self.__simconfig, self.__results)
+        elif self.__simconfig.compiler== 'jmodelica':
+            pass
+        elif self.__simconfig.compiler== 'openmodelica':
+            self.__simulationTask = TaskThreadOMC(self, self.__simsource, self.__simconfig, self.__omcSession, self.__results)
+        self.__simulationTask.taskFinished.connect(self.onFinishSimulation)
     
     ### save/load configuration
     def load_configuration(self):
