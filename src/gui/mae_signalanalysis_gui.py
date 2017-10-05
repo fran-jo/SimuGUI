@@ -4,13 +4,11 @@ Created on 19 jan 2016
 @author: fragom
 '''
 '''TODO add a tab page for each source (simulation,measurement) '''
-import os
 from PyQt4 import QtGui, uic, QtCore
-from PyQt4.QtCore import QString
 from PyQt4.QtGui import QTreeWidgetItem
 from matplotlibwidget import MatplotlibWidget
 from inout.streamh5cim import StreamH5CIM
-from methods import MethodAmbientAnalysis
+from gui import UI_ModeEstimation
 
 __form_gui = uic.loadUiType("./res/mae_signalanalysis_gui.ui")[0] # Load the UI
 
@@ -25,11 +23,11 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
-        self.plotSimu = MatplotlibWidget(self.mplotSimulation, width= 410, height= 290, dpi= 60)
-        self.plotSimu.setGeometry(QtCore.QRect(0, 0, 410, 290))
+        self.plotSimu = MatplotlibWidget(self.mplotSimulation, width= 440, height= 225, dpi= 60)
+        self.plotSimu.setGeometry(QtCore.QRect(0, 0, 440, 225))
         self.plotSimu.setObjectName("mplotSimwidget")
-        self.plotMeas = MatplotlibWidget(self.mplotMeasurements, width= 410, height= 290, dpi= 60)
-        self.plotMeas.setGeometry(QtCore.QRect(0, 0, 410, 290))
+        self.plotMeas = MatplotlibWidget(self.mplotMeasurements, width= 440, height= 225, dpi= 60)
+        self.plotMeas.setGeometry(QtCore.QRect(0, 0, 440, 225))
         self.plotMeas.setObjectName("mplotMeaswidget")
         #
         self.cbxOutputs.activated['QString'].connect(self.__load_OutputSignals)
@@ -37,12 +35,10 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         #
         self.cbxMeasurements.activated['QString'].connect(self.__load_Measurements)
         self.onLoad_populateMeasurements()
-        #
-        #self.btnBasicMethod.clicked.connect(self.onStart_basicMethod)
-        self.btn_basicMethod.clicked.connect(self.onStart_basicMethod)
-        # table of analysis results
-        self.tbwAnalysisRes.setColumnCount(5)
-        self.tbwAnalysisRes.setHorizontalHeaderLabels(QString(" ;Sim Freq.;Sim Damp.;Meas Freq..;Meas Damp.").split(";"))
+        # menu items
+        self.action_ModeEstimation.setShortcut('Ctrl+M')
+        self.action_ModeEstimation.setStatusTip('Mode Estimation based on Signals')
+        self.action_ModeEstimation.triggered.connect(self.show_meGUI)
         
     def onLoad_populateOutputFiles(self):
         ''' List in the combobox all the outputs files from the database of Dy, OMC, JM results 
@@ -139,35 +135,10 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         ptwidget.theplot.set_xlabel('Time (s)')
         ptwidget.theplot.set_ylabel('Magnitude (unit)')
         ptwidget.plot(measurement['sampleTime'], measurement['magnitude'], hold)
-
-    def onStart_basicMethod(self):
-        self.tbwAnalysisRes.setRowCount(0)
-        self.__analysisTask = MethodAmbientAnalysis(self.__simulation, self.__measurement)
-        self.__analysisTask.order= str(self.txtOrder.text())
-        self.__analysisTask.toolDir= os.getcwd()
-        self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)
-        self.__analysisTask.start()
-            
-    def onFinish_basicMethod(self):
-        os.chdir(self.__analysisTask.toolDir)
-        self.__analysisTask.gather_EigenValues()
-        for mode in self.__analysisTask.simulationModes:
-            rowPosition = self.tbwAnalysisRes.rowCount()
-            self.tbwAnalysisRes.insertRow(rowPosition)
-            self.tbwAnalysisRes.setItem(rowPosition, 0, QtGui.QTableWidgetItem('Mode '+ str(rowPosition)))
-            self.tbwAnalysisRes.setItem(rowPosition, 1, QtGui.QTableWidgetItem(str(mode.real)))
-            self.tbwAnalysisRes.setItem(rowPosition, 2, QtGui.QTableWidgetItem(str(mode.imag)))
-        rowPosition= 0
-        for mode in self.__analysisTask.measurementModes:
-            self.tbwAnalysisRes.setItem(rowPosition, 3, QtGui.QTableWidgetItem(str(mode.real)))
-            self.tbwAnalysisRes.setItem(rowPosition, 4, QtGui.QTableWidgetItem(str(mode.imag)))
-            if rowPosition> self.tbwAnalysisRes.rowCount():
-                self.tbwAnalysisRes.insertRow(rowPosition)
-            rowPosition= rowPosition+ 1
-        self.tbwAnalysisRes.show()
-        ''' TODO: first use the mode_estimation_res.h5 directly '''
-        ''' TODO: second, use the whole workflow '''
         
-
+    def show_meGUI(self):
+        modedialog = UI_ModeEstimation(self)
+        modedialog.setWindowTitle('Signal Mode Estimation')
+        modedialog.show() 
 
     
