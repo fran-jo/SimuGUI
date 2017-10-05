@@ -141,10 +141,8 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         ptwidget.plot(measurement['sampleTime'], measurement['magnitude'], hold)
 
     def onStart_basicMethod(self):
-        print str(self.txtOrder.text())
         self.tbwAnalysisRes.setRowCount(0)
-        self.__analysisTask = MethodAmbientAnalysis(self.__simulation['magnitude'], 
-                                                    self.__measurement['magnitude'])
+        self.__analysisTask = MethodAmbientAnalysis(self.__simulation, self.__measurement)
         self.__analysisTask.order= str(self.txtOrder.text())
         self.__analysisTask.toolDir= os.getcwd()
         self.__analysisTask.taskFinished.connect(self.onFinish_basicMethod)

@@ -7,7 +7,7 @@ from PyQt4 import QtCore, QtGui, uic
 from PyQt4.QtCore import QSize
 from PyQt4.QtGui import QIcon
 from OMPython import OMCSession
-from classes import CommandOMC
+from utilsmee import CommandOMC
 from engines.engineOpenModelica import EngineOMC
 from engines.engineDymola import EngineDY
 from modelicares import SimRes
