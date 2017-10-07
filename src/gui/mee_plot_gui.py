@@ -8,7 +8,10 @@ import platform
 from PyQt4 import QtGui, uic, QtCore
 from PyQt4.QtGui import QTreeWidgetItem
 from modelicares import util
-from matplotlibwidget import MatplotlibWidget
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt4agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+    NavigationToolbar2QT as NavigationToolbar)
 from inout.streamcimh5 import StreamCIMH5
 from modelicares import SimRes
 
@@ -26,9 +29,10 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         #
-        self.mplotwidget = MatplotlibWidget(self.centralWidget, width= 590, height= 380, dpi= 60)
-        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 590, 380))
-        self.mplotwidget.setObjectName("mplotwidget")
+#         self.mplotwidget = MatplotlibWidget(self.centralWidget, width= 590, height= 380, dpi= 60)
+#         self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 590, 380))
+#         self.mplotwidget.setObjectName("mplotwidget")
+        self.createGraficaSimu()
         #
 #         self.__results= simulationResults
 #         arbol = util.tree(self.__results.names())
@@ -40,6 +44,19 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
         self.btnSaveSignals.clicked.connect(self.__saveSignals)
         self.btnBrowseMeasurements.clicked.connect(self.__browseFolder)
         self.cbxOutputs.activated['QString'].connect(self.__loadOutputFile)
+        
+    def createGraficaSimu(self):
+        self.figureGS = Figure()
+        self.canvasGS = FigureCanvas(self.figureGS)
+        self.toolbarGS = NavigationToolbar(self.canvasGS, self)
+        self.graficaGS = self.figureGS.add_subplot(111) 
+        self.graficaGS.grid()
+        # set the layout
+        layoutGS = QtGui.QVBoxLayout()
+        layoutGS.addWidget(self.canvasGS)
+        layoutGS.addWidget(self.toolbarGS)
+        layoutGS.setContentsMargins(0,0,0,0)
+        self.centralWidget.setLayout(layoutGS)
         
     def keyPressEvent(self, event):
         if event.key()== QtCore.Qt.Key_Backspace:
@@ -116,13 +133,13 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
             text += '\n' + 'Description: ' + sim[name].description
             text += '\n' + 'unit: ' + sim[name].unit
             text += '\n' + 'displayUnit: ' + sim[name].displayUnit
-            ''' TODO updated title, xAxis and yAxis labels
-            TODO handle multiple signals- hold option
-            TODO export to CSV '''
-            self.mplotwidget.theplot.set_title('Something here')
-            self.mplotwidget.theplot.set_xlabel('Time (s)')
-            self.mplotwidget.theplot.set_ylabel(sim[name].description)
-            self.mplotwidget.plot(sim[name].times().tolist(), sim[name].values().tolist())
+            self.graficaGS.clear()
+            self.graficaGS.plot(sim[name].times().tolist(), sim[name].values().tolist())
+            self.graficaGS.set_title("Signal", fontsize=12)
+            self.graficaGS.set_xlabel("Time (s)", fontsize=10)
+            self.graficaGS.set_ylabel("Magnitude (Unit)", fontsize=10)
+            self.graficaGS.grid()
+            self.canvasGS.draw()  
         else:
             print "nothing to plot"
             

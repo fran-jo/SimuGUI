@@ -1,12 +1,14 @@
-from PyQt4.QtGui import QSizePolicy
-from PyQt4 import QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as Canvas
+
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+import matplotlib.pyplot as PlotFig
 
 from matplotlib import rcParams
+from PyQt4.QtGui import QFormLayout
 rcParams['font.size'] = 9
 
-class MatplotlibWidget(Canvas):
+class MatplotlibWidget(FigureCanvas):
     """
     MatplotlibWidget inherits PyQt4.QtGui.QWidget
     and matplotlib.backend_bases.FigureCanvasBase
@@ -32,28 +34,60 @@ class MatplotlibWidget(Canvas):
     axes: figure axes
     """    
     def __init__(self, parent=None, title='Title', xlabel='x label', ylabel='y label', 
-                width= 100, height= 100, dpi=100, hold=False):
+                width= 100, height= 100, dpi=100):
         super(MatplotlibWidget, self).__init__(Figure())
 
         self.setParent(parent)
-        self.figure = Figure(figsize=(width, height), dpi=dpi)
-        self.canvas = Canvas(self.figure)
-        self.theplot = self.figure.add_subplot(111)       
-        self.theplot.set_title(title, fontsize=12)
-        self.theplot.set_xlabel(xlabel, fontsize=10)
-        self.theplot.set_ylabel(ylabel, fontsize=10)
-        self.theplot.grid()
-        self.theplot.hold(hold)
-        
+        self.figure= PlotFig.figure(figsize=(width, height), dpi=dpi) 
+        #self.figure = Figure(figsize=(width, height), dpi=dpi)
+        self.canvas = FigureCanvas(self.figure)
+        #self.canvas.setParent(parent)
+        #self.canvas.setFocusPolicy(Qt.StrongFocus)
+        #self.canvas.setFocus()
+        self.grafica = self.figure.add_subplot(111) 
+        self.grafica.set_title(title, fontsize=12)
+        self.grafica.set_xlabel(xlabel, fontsize=10)
+        self.grafica.set_ylabel(ylabel, fontsize=10)
+        self.grafica.grid()
+        self.toolbar= NavigationToolbar(self.canvas, self)
+        self.toolbar.setParent(parent)
+        vboxtab= QFormLayout()
+        vboxtab.addWidget(self.canvas)
+        vboxtab.addWidget(self.toolbar)
+        parent.setLayout(vboxtab)
         #Canvas.setSizePolicy(self, QSizePolicy.Minimum, QSizePolicy.Minimum)
-        Canvas.updateGeometry(self)
+        #FigureCanvas.updateGeometry(self)
 
-    def plot(self, x, y, hold= False):
-        self.theplot.plot(x,y)
-        self.theplot.grid()
+#     def setLayout(self, widgentparent, height, width):
+#         vboxtabSim= QVBoxLayout()
+#         vboxtabSim.addWidget(self.figure)
+#         vboxtabSim.addWidget(self.toolbar)
+#         widgentparent.setLayout(vboxtabSim)
+#         widgentparent.setFixedWidth(width)
+#         widgentparent.setFixedHeight(height)
+    
+    def plot(self, x, y, title='Title', xlabel='x label', ylabel='y label', c= 'b', marker= 'o', hold= False):
+        if not hold:
+            self.grafica.clear()
+        self.grafica.plot(x,y)
+        self.grafica.set_title(title, fontsize=12)
+        self.grafica.set_xlabel(xlabel, fontsize=10)
+        self.grafica.set_ylabel(ylabel, fontsize=10)
+        self.grafica.grid()
         self.draw()  
-          
+    
+    def scatter(self, x, y, title='Title', xlabel='x label', ylabel='y label', c= 'b', marker= 'o', hold= False):
+        self.grafica = self.figure.add_subplot(111)   
+#         if not hold:
+#             self.grafica.clear()
+        self.grafica.scatter(x,y, c=c, marker=marker)
+        self.grafica.set_title(title, fontsize=12)
+        self.grafica.set_xlabel(xlabel, fontsize=10)
+        self.grafica.set_ylabel(ylabel, fontsize=10)
+        self.grafica.grid()
+        self.draw()
+        
     def clear(self):
-        self.theplot.cla()
-        self.theplot.grid()
+        self.grafica.cla()
+        self.grafica.grid()
         self.draw()

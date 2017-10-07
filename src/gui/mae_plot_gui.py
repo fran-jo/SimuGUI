@@ -6,9 +6,13 @@ Created on 19 jan 2016
 
 from PyQt4 import QtGui, uic, QtCore
 from PyQt4.QtGui import QTreeWidgetItem
-from matplotlibwidget import MatplotlibWidget
 from inout.streamh5cim import StreamH5CIM
 from mae_importdata_gui import UI_ImportData
+from matplotlib import pyplot as plt
+from matplotlib.widgets import Cursor
+from matplotlib.backends.backend_qt4agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+    NavigationToolbar2QT as NavigationToolbar)
 
 '''TODO Import Selected variables into H5 '''
 '''TODO handel multiple selection '''
@@ -25,9 +29,10 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
         self.setupUi(self)
         self.load_h5db()
         #
-        self.mplotwidget = MatplotlibWidget(self.centralWidget, width= 590, height= 380, dpi= 60)
-        self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 590, 380))
-        self.mplotwidget.setObjectName("mplotwidget")
+#         self.mplotwidget = MatplotlibWidget(self.centralWidget, width= 590, height= 380, dpi= 60)
+#         self.mplotwidget.setGeometry(QtCore.QRect(0, 0, 590, 380))
+#         self.mplotwidget.setObjectName("mplotwidget")
+        self.createGraficaMeas()
         #
         self.twVariable.itemSelectionChanged.connect(self.__onSelectionChanged)
         #
@@ -37,6 +42,19 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
         #
         self.btnImportMeasurements.clicked.connect(self.__openImportDialog)
 
+    def createGraficaMeas(self):
+        self.figureGM = plt.figure(figsize=(590, 380), dpi=80)
+        self.canvasGM = FigureCanvas(self.figureGM)
+        self.toolbarGM = NavigationToolbar(self.canvasGM, self)
+        self.graficaGM = self.figureGM.add_subplot(111) 
+        self.graficaGM.grid()
+        # set the layout
+        layoutGM = QtGui.QVBoxLayout()
+        layoutGM.addWidget(self.canvasGM)
+        layoutGM.addWidget(self.toolbarGM)
+        layoutGM.setContentsMargins(0,0,0,0)
+        self.centralWidget.setLayout(layoutGM)
+        
             
     def load_h5db(self):
         fsm = QtGui.QFileSystemModel()
@@ -55,7 +73,7 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
         # TODO select power system resource
         arbolMedidas= self.__dbh5api.select_treeMeasurements(self.__dbh5api.modelName)
         for psres in arbolMedidas:
-            print "%s: %s" % (psres, arbolMedidas[psres]) 
+#             print "%s: %s" % (psres, arbolMedidas[psres]) 
             itemParent= QTreeWidgetItem()
             itemParent.setText(0,unicode(psres))
             for psmeas in arbolMedidas[psres]:
@@ -86,11 +104,15 @@ class UI_Plot_MAE(QtGui.QDialog, form_gui):
         if self.__dbh5api.exist_PowerSystemResource(componentname):
             self.__dbh5api.select_PowerSystemResource(componentname)
             self.__dbh5api.select_AnalogMeasurement(variablename)
-            self.mplotwidget.theplot.set_title('Something here')
-            self.mplotwidget.theplot.set_xlabel('Time (s)')
-            self.mplotwidget.theplot.set_ylabel('Magnitude (unit)')
-            self.mplotwidget.plot(self.__dbh5api.analogMeasurementValues['sampleTime'], 
-                                  self.__dbh5api.analogMeasurementValues['magnitude'])
+            self.graficaGM.clear()
+            self.graficaGM.plot(self.__dbh5api.analogMeasurementValues['sampleTime'], 
+                                self.__dbh5api.analogMeasurementValues['magnitude'])
+            self.graficaGM.set_title("Signal", fontsize=12)
+            self.graficaGM.set_xlabel("Time (s)", fontsize=10)
+            self.graficaGM.set_ylabel("Magnitude (Unit)", fontsize=10)
+            self.cursor = Cursor(self.graficaGM, lw = 2)
+            self.graficaGM.grid()
+            self.canvasGM.draw()
         else:
             print "nothing to plot"
         # TODO select analog measurement and analogvalue

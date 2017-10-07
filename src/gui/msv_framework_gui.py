@@ -6,14 +6,11 @@ Created on 19 jan 2016
 
 import sys
 from PyQt4 import QtGui, uic
-from PyQt4.QtCore import QSize
-from PyQt4.QtGui import QApplication, QIcon
+from PyQt4.QtCore import QSize, QRect
+from PyQt4.QtGui import QApplication, QIcon, QDesktopWidget
+import matplotlib.pyplot as plt
 from gui import UI_LoadSources, UI_ConfigSolver, UI_Simulation, UI_Linearization
 from gui import UI_Plot_MEE, UI_Plot_MAE, UI_M2M, UI_SignalAnalysis
-from modelicares import SimRes
-#debug
-from ctrl import SimulationResources
-from ctrl import SimulationConfigOMCDY
 
 main_form = uic.loadUiType("./res/msv_framework_gui.ui")[0] # Load the UI
 # form_confSolver = uic.loadUiType("./res/mee_configsolvers_gui.ui")[0] # Load the UI
@@ -23,6 +20,7 @@ class MVSGUI(QtGui.QMainWindow, main_form):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
         self.setupUi(self)
+        plt.style.use('ggplot')
         #
         self.btnM2M.setIcon(QIcon('./res/img/m2m_transparent.ico'))
         self.btnM2M.setIconSize(QSize(48,48))
