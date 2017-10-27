@@ -3,7 +3,6 @@ Created on 19 jan 2016
 
 @author: fragom
 '''
-'''TODO add a tab page for each source (simulation,measurement) '''
 from PyQt4 import QtGui, uic, QtCore
 from PyQt4.QtGui import QTreeWidgetItem
 from inout.streamh5cim import StreamH5CIM
@@ -32,8 +31,8 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
 #         self.plotMeas = MatplotlibWidget(self.wgtGraficaMeas, width= 485, height= 380, dpi= 80)
 #         self.plotMeas.setGeometry(QtCore.QRect(0, 0, 485, 380))
 #         self.plotMeas.setObjectName("mplotMeaswidget")
-        self.createGraficaSimu()
-        self.createGraficaMeas()
+        self.__createGraficaSimu()
+        self.__createGraficaMeas()
         self.toolbars= MultiTabNavTool([self.canvasGS,self.canvasGM],
                                        self.tabWidget, self)
         #vboxtabMeas= QVBoxLayout()
@@ -50,7 +49,11 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         self.btnRunAnalysis.clicked.connect(self.show_meGUI)
         self.chbComparewMeas.stateChanged.connect(self.compareWMeas_checked)
         
-    def createGraficaSimu(self):
+    def __clearGraficaSimu(self):
+        self.graficaGS.clear()
+        self.canvasGS.draw()
+        
+    def __createGraficaSimu(self):
         self.figureGS = plt.figure(figsize=(510, 360), dpi=80)
         self.canvasGS = FigureCanvas(self.figureGS)
 #         self.toolbarGS = NavigationToolbar(self.canvasGS, self)
@@ -63,7 +66,11 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         self.wgtGraficaSimu.setGeometry(QtCore.QRect(0, 0, 510, 410))
         self.wgtGraficaSimu.setLayout(layoutGS)
         
-    def createGraficaMeas(self):
+    def __clearGraficaMeas(self):
+        self.graficaGM.clear()
+        self.canvasGM.draw()
+        
+    def __createGraficaMeas(self):
         self.figureGM = Figure()
         self.canvasGM = FigureCanvas(self.figureGM)
 #         self.toolbarGM = NavigationToolbar(self.canvasGM, self)
@@ -123,17 +130,33 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         '''
         Update the variable's attributes and plot
         '''
+        self.__clearGraficaSimu()
         getSelected = self.twOutVariable.selectedItems()
-        if getSelected:
-            baseNode = getSelected[0]
+        for baseNode in getSelected:
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
-        if self.__simudb.exist_PowerSystemResource(str(parentName)):
-            self.__simudb.select_PowerSystemResource(str(parentName))
-            self.__simudb.select_AnalogMeasurement(str(childName))
-            self.__simulation= self.__simudb.analogMeasurementValues
-        self.__view_Simulation(self.__simulation, hold= False)
+            if self.__simudb.exist_PowerSystemResource(str(parentName)):
+                self.__simudb.select_PowerSystemResource(str(parentName))
+                self.__simudb.select_AnalogMeasurement(str(childName))
+                self.__view_Simulation(self.__simudb.analogMeasurementValues)
 
+    def __view_Simulation(self, selectedSignal):
+        '''Show the variable's attributes and a small plot. fix it using the matplotlibwidget
+        Using H5 database for ploting measurement signals'''
+#             text = 'Name: ' + senyal['unitSymbol']
+#             text += '\n' + 'Description: ' + senyal['unitMultiplier']
+#             text += '\n' + 'unit: ' + senyal['measurementType']
+#             text += '\n' + 'displayUnit: ' + senyal['measurementType']
+#         ptwidget.plot(measurement['sampleTime'], measurement['magnitude'],
+#                       title='Signal', xlabel='Time (s)', ylabel='Magnitude (Unit)', hold= False)
+        #for measurement in selectedMeasurement:
+        self.graficaGS.plot(selectedSignal['sampleTime'], selectedSignal['magnitude'])
+        self.graficaGS.set_title("Signal", fontsize=12)
+        self.graficaGS.set_xlabel("Time (s)", fontsize=10)
+        self.graficaGS.set_ylabel("Magnitude (Unit)", fontsize=10)
+        self.graficaGS.hold(True)
+        self.canvasGS.draw()  
+        
     def __load_Measurements(self, dbh5file):
         ''' load signals from the h5 database '''
         self.__measdb= StreamH5CIM('./db/measurements', str(dbh5file))
@@ -156,18 +179,20 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         '''
         Update the variable's attributes and plot
         '''
+        self.__clearGraficaMeas()
         getSelected = self.twMeasVariable.selectedItems()
-        if getSelected:
-            baseNode = getSelected[0]
+        if getSelected== []:
+            self.graficaGM.clear()
+            self.canvasGM.draw() 
+        for baseNode in getSelected:
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
-        if self.__measdb.exist_PowerSystemResource(str(parentName)):
-            self.__measdb.select_PowerSystemResource(str(parentName))
-            self.__measdb.select_AnalogMeasurement(str(childName))
-            self.__measurement= self.__measdb.analogMeasurementValues
-        self.__view_Measurement(self.__measurement, hold= False)
+            if self.__measdb.exist_PowerSystemResource(str(parentName)):
+                self.__measdb.select_PowerSystemResource(str(parentName))
+                self.__measdb.select_AnalogMeasurement(str(childName))
+                self.__view_Measurement(self.__measdb.analogMeasurementValues)
         
-    def __view_Simulation(self, measurement, hold= False):
+    def __view_Measurement(self, measurement):
         '''Show the variable's attributes and a small plot. fix it using the matplotlibwidget
         Using H5 database for ploting measurement signals'''
 #             text = 'Name: ' + senyal['unitSymbol']
@@ -176,31 +201,11 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
 #             text += '\n' + 'displayUnit: ' + senyal['measurementType']
 #         ptwidget.plot(measurement['sampleTime'], measurement['magnitude'],
 #                       title='Signal', xlabel='Time (s)', ylabel='Magnitude (Unit)', hold= False)
-        if not hold:
-            self.graficaGS.clear()
-        self.graficaGS.plot(measurement['sampleTime'], measurement['magnitude'])
-        self.graficaGS.set_title("Signal", fontsize=12)
-        self.graficaGS.set_xlabel("Time (s)", fontsize=10)
-        self.graficaGS.set_ylabel("Magnitude (Unit)", fontsize=10)
-        self.graficaGS.grid()
-        self.canvasGS.draw()  
-        
-    def __view_Measurement(self, measurement, hold= False):
-        '''Show the variable's attributes and a small plot. fix it using the matplotlibwidget
-        Using H5 database for ploting measurement signals'''
-#             text = 'Name: ' + senyal['unitSymbol']
-#             text += '\n' + 'Description: ' + senyal['unitMultiplier']
-#             text += '\n' + 'unit: ' + senyal['measurementType']
-#             text += '\n' + 'displayUnit: ' + senyal['measurementType']
-#         ptwidget.plot(measurement['sampleTime'], measurement['magnitude'],
-#                       title='Signal', xlabel='Time (s)', ylabel='Magnitude (Unit)', hold= False)
-        if not hold:
-            self.graficaGM.clear()
         self.graficaGM.plot(measurement['sampleTime'], measurement['magnitude'])
         self.graficaGM.set_title("Signal", fontsize=12)
         self.graficaGM.set_xlabel("Time (s)", fontsize=10)
         self.graficaGM.set_ylabel("Magnitude (Unit)", fontsize=10)
-        self.graficaGM.grid()
+        self.graficaGM.hold(True)
         self.canvasGM.draw()  
         
     def show_meGUI(self):

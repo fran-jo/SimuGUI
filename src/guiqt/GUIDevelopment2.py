@@ -10,9 +10,9 @@
 from PyQt4 import QtCore, QtGui
 from OMPython import OMCSession
 from SimulationOMC import SimulationOMC
-#from SimulationResources import SimulationResources
-#from tstctrl import SimulationResources
-from ctrlinfogui import SimulationResources, SimulationConfigurationOMC
+#from CompilerResources import CompilerResources
+#from tstctrl import CompilerResources
+from ctrlinfogui import CompilerResources, SimulationConfigurationOMC
 from commandOMC import CommandOMC
 import sys, time 
 
@@ -47,7 +47,7 @@ class Ui_Dialog(object):
     fname2='simConfigurationOMC3.properties'
     fname3='ClassNames.properties'
     fname4='ieee9bus_varList.properties'
-    source1=SimulationResources([fname1,'w'])
+    source1=CompilerResources([fname1,'w'])
     source2=SimulationConfigurationOMC([fname2,'w'])
     source3=SimulationConfigurationOMC([fname3,'w'])
     lis=[]
@@ -335,7 +335,7 @@ class Ui_Dialog(object):
              
     def Load_Resource(self):
         #self.fname = QtGui.QFileDialog.getOpenFileName(Dialog, 'Select file')
-        self.sources= SimulationResources([self.fname1,'r'])
+        self.sources= CompilerResources([self.fname1,'r'])
         self.sources.load_Properties()
         self.lineEdit.setText(self.sources.get_modelFile())
         #print self.sources.get_modelFile()

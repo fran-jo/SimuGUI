@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>461</width>
-    <height>251</height>
+    <height>264</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>10</x>
      <y>10</y>
      <width>441</width>
-     <height>231</height>
+     <height>251</height>
     </rect>
    </property>
    <property name="title">
@@ -64,7 +64,7 @@
       <x>10</x>
       <y>50</y>
       <width>421</width>
-      <height>141</height>
+      <height>148</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_4">
@@ -201,14 +201,24 @@
        </item>
       </widget>
      </item>
+     <item row="2" column="2">
+      <widget class="QCheckBox" name="chbfixstep">
+       <property name="text">
+        <string>Fix Step</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QLineEdit" name="txtfixstep"/>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="layoutWidget_3">
     <property name="geometry">
      <rect>
-      <x>76</x>
-      <y>190</y>
-      <width>291</width>
+      <x>80</x>
+      <y>200</y>
+      <width>307</width>
       <height>41</height>
      </rect>
     </property>

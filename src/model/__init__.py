@@ -1,0 +1,4 @@
+from compilerresources import CompilerResources
+from compilerconfiguration import DymolaConfiguration
+from compilerconfiguration import OpenModelicaConfiguration
+from compilerconfiguration import  JModelicaConfiguration

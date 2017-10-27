@@ -247,7 +247,7 @@
     <rect>
      <x>10</x>
      <y>520</y>
-     <width>680</width>
+     <width>840</width>
      <height>41</height>
     </rect>
    </property>
@@ -277,9 +277,9 @@
    <property name="geometry">
     <rect>
      <x>690</x>
-     <y>116</y>
+     <y>109</y>
      <width>160</width>
-     <height>404</height>
+     <height>411</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -318,7 +318,7 @@
     <enum>QFrame::Raised</enum>
    </property>
    <property name="selectionMode">
-    <enum>QAbstractItemView::SingleSelection</enum>
+    <enum>QAbstractItemView::MultiSelection</enum>
    </property>
    <property name="selectionBehavior">
     <enum>QAbstractItemView::SelectRows</enum>
@@ -388,8 +388,6 @@
       </size>
      </property>
     </widget>
-    <zorder>wgtGraficaSimu</zorder>
-    <zorder>widgetToolbar</zorder>
    </widget>
    <widget class="QWidget" name="tabViewMeas">
     <attribute name="title">
@@ -432,9 +430,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>116</y>
+     <y>109</y>
      <width>160</width>
-     <height>404</height>
+     <height>411</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -473,7 +471,7 @@
     <enum>QFrame::Raised</enum>
    </property>
    <property name="selectionMode">
-    <enum>QAbstractItemView::SingleSelection</enum>
+    <enum>QAbstractItemView::MultiSelection</enum>
    </property>
    <property name="indentation">
     <number>10</number>

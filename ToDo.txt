@@ -4,8 +4,5 @@ ScriptMEE
 Insert into tab python plot with sim results
 
 ScriptMAE
-Insert plot into screen
-Button command for calculating modes
-Insert mode plot into screen
 
 simular ieee 9 bus

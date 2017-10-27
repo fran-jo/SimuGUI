@@ -16,7 +16,6 @@ from inout.streamcimh5 import StreamCIMH5
 from modelicares import SimRes
 
 '''TODO Import Selected variables into H5 '''
-'''TODO handel multiple selection '''
 
 form_gui = uic.loadUiType("./res/mee_plot_gui.ui")[0] # Load the UI
 
@@ -103,79 +102,83 @@ class UI_Plot_MEE(QtGui.QDialog, form_gui):
             childItem.setText(0, unicode(branches))
             itemParent.addChild(childItem)
    
-    def __onSelectionChanged(self):
-        """Update the variable's attributes and plot.
-        """
+    def selectionChanged(self):
+        ''' TODO: it has to be a better way to get a full name from the tree view.
+        By full name I mean 1stlevel.2ndlevel.3rdlevel.etc....'''
         getSelected = self.twVariable.selectedItems()
-        if getSelected:
-            baseNode = getSelected[0]
+        selectedParams= []
+        for baseNode in getSelected:
+            #baseNode = getSelected[0]
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
             if baseNode.parent().parent()!= None:
                 grandpaName= str(baseNode.parent().parent().text(0))
             if grandpaName== self.__results.fbase:
-                paramName= parentName+ '.'+ childName
+                selectedParams.append(parentName+ '.'+ childName)
             else:
-                paramName= grandpaName+ '.'+ parentName+ '.'+ childName
+                selectedParams.append(grandpaName+ '.'+ parentName+ '.'+ childName)
+        return selectedParams
         
-        self.__view_Signal(str(paramName), self.__results)
+    def __onSelectionChanged(self):
+        
+        try:
+            self.graficaGS.clear()
+            selectedParams= self.selectionChanged()
+            if selectedParams== []:
+                self.canvasGS.clear()
+            else:
+                self.__view_Signal(selectedParams, self.__results)
+        except UnboundLocalError:
+            self.graficaGS.clear()
         
     # This function has been copied and modified from ModelicaRes version 0.12
     # (Kevin Davies,
     # http://kdavies4.github.io/ModelicaRes/,
     # BSD License)
-    def __view_Signal(self, name, sim, event= None):
+    def __view_Signal(self, signalsToPlot, sim, event= None):
         '''Show the variable's attributes and a small plot.
         fix it using the matplotlibwidget
         Using ModelicaRes for ploting simulation signals'''
-        if name:
+        for name in signalsToPlot:
+            name= str(name)
             text = 'Name: ' + name
             text += '\n' + 'Description: ' + sim[name].description
             text += '\n' + 'unit: ' + sim[name].unit
             text += '\n' + 'displayUnit: ' + sim[name].displayUnit
-            self.graficaGS.clear()
             self.graficaGS.plot(sim[name].times().tolist(), sim[name].values().tolist())
-            self.graficaGS.set_title("Signal", fontsize=12)
-            self.graficaGS.set_xlabel("Time (s)", fontsize=10)
-            self.graficaGS.set_ylabel("Magnitude (Unit)", fontsize=10)
-            self.graficaGS.grid()
+            self.graficaGS.set_title("Signal", fontsize=14)
+            self.graficaGS.set_xlabel("Time (s)", fontsize=12)
+            self.graficaGS.set_ylabel(sim[name].displayUnit, fontsize=12)
+            #TODO Add legend automatically, bottom-right corner
+            self.graficaGS.hold(True)
             self.canvasGS.draw()  
-        else:
-            print "nothing to plot"
             
     def __saveSignals(self):
         ''' TODO treat multiple signals from here, using StreamCIMH5 API '''
-        getSelected = self.twVariable.selectedItems()
-        if getSelected:
-            baseNode = getSelected[0]
-            parentName= str(baseNode.parent().text(0))
-            childName= baseNode.text(0)
-            if baseNode.parent().parent()!= None:
-                grandpaName= str(baseNode.parent().parent().text(0))
-            if grandpaName== self.__results.fbase:
-                paramName= parentName+ '.'+ childName
-            else:
-                paramName= grandpaName+ '.'+ parentName+ '.'+ childName
+        selectedParams= self.selectionChanged()
         dbh5api= StreamCIMH5('./db/simulation', self.__results.fbase)
         dbh5api.open(self.__results.fbase, mode= 'a')
-        if not dbh5api.exist_PowerSystemResource(str(parentName)):
-            dbh5api.add_PowerSystemResource(str(parentName))
-        else:
-            dbh5api.update_PowerSystemResource(str(parentName), str(parentName))
-        
-        if not dbh5api.exist_AnalogMeasurement(str(childName)):
-            dbh5api.add_AnalogMeasurement(str(childName),
-                                      self.__results[str(paramName)].unit, 
-                                     'unitMultiplier')
-            dbh5api.add_AnalogValue(self.__results[str(paramName)].times().tolist(),
-                                self.__results[str(paramName)].values().tolist())
-        else:
-            dbh5api.select_AnalogMeasurement()
-            dbh5api.update_AnalogMeasurement(str(childName), self.__results[str(paramName)].unit, 
-                                     'unitMultiplier')
-            dbh5api.update_AnalogValue(str(childName),
-                                       self.__results[str(paramName)].times().tolist(),
-                                       self.__results[str(paramName)].values().tolist())
+        for paramName in selectedParams:
+            parentName= paramName.split('.')[-2]
+            childName= paramName.split('.')[-1]
+            if not dbh5api.exist_PowerSystemResource(str(parentName)):
+                dbh5api.add_PowerSystemResource(str(parentName))
+            else:
+                dbh5api.update_PowerSystemResource(str(parentName), str(parentName))
+            
+            if not dbh5api.exist_AnalogMeasurement(str(childName)):
+                dbh5api.add_AnalogMeasurement(str(childName),
+                                          self.__results[str(paramName)].unit, 
+                                         'unitMultiplier')
+                dbh5api.add_AnalogValue(self.__results[str(paramName)].times().tolist(),
+                                    self.__results[str(paramName)].values().tolist())
+            else:
+                dbh5api.select_AnalogMeasurement()
+                dbh5api.update_AnalogMeasurement(str(childName), self.__results[str(paramName)].unit, 
+                                         'unitMultiplier')
+                dbh5api.update_AnalogValue(str(childName),
+                                           self.__results[str(paramName)].times().tolist(),
+                                           self.__results[str(paramName)].values().tolist())
         dbh5api.close()
-        
+        #TODO log export variables, success or failure
         

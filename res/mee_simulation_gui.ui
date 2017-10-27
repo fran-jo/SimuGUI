@@ -388,7 +388,7 @@
        <item row="1" column="0">
         <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>Interval</string>
+          <string>Interval / Step Size</string>
          </property>
         </widget>
        </item>

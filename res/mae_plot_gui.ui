@@ -10,13 +10,13 @@
     <x>0</x>
     <y>0</y>
     <width>835</width>
-    <height>475</height>
+    <height>483</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>11</x>
@@ -78,7 +78,7 @@
        <enum>QFrame::Raised</enum>
       </property>
       <property name="selectionMode">
-       <enum>QAbstractItemView::SingleSelection</enum>
+       <enum>QAbstractItemView::MultiSelection</enum>
       </property>
       <property name="indentation">
        <number>10</number>
@@ -125,15 +125,14 @@
      <height>380</height>
     </size>
    </property>
-   <zorder>widgetGrafica_2</zorder>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>233</x>
      <y>11</y>
      <width>591</width>
-     <height>31</height>
+     <height>32</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">

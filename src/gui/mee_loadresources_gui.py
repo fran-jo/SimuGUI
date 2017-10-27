@@ -4,7 +4,7 @@ Created on Dec 13, 2015
 @author: fran_jo
 '''
 from PyQt4 import QtGui, uic
-from ctrl.ctrlresources import SimulationResources
+from model import CompilerResources
    
 form_gui = uic.loadUiType("./res/mee_loadsources_gui.ui")[0] # Load the UI
                  
@@ -20,7 +20,7 @@ class UI_LoadSources(QtGui.QDialog, form_gui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         ''' select resources for simulation '''
-        self.__simsource= SimulationResources([self.defaultsourcesFile,'r+'])
+        self.__simsource= CompilerResources([self.defaultsourcesFile,'r+'])
         self.btnCIMFolder.clicked.connect(lambda: self.load_folderPath(1))
         self.btnModelFolder.clicked.connect(lambda: self.load_folderPath(2)) 
         self.btnLibraryFolder.clicked.connect(lambda: self.load_folderPath(3))  
@@ -56,7 +56,7 @@ class UI_LoadSources(QtGui.QDialog, form_gui):
     ### save/load resources
     def btn_loadResources_clicked(self):
         sourcesFile = QtGui.QFileDialog.getOpenFileName(self, 'Select Resources properties')
-        self.__simsource= SimulationResources([sourcesFile,'r+'])
+        self.__simsource= CompilerResources([sourcesFile,'r+'])
         self.__simsource.load_Properties()
         self.txtCIMFolder.setText(self.__simsource.cimFolder)
         self.txtModelsFolder.setText(self.__simsource.modelFolder)
@@ -65,7 +65,7 @@ class UI_LoadSources(QtGui.QDialog, form_gui):
         
     def btn_saveResources_clicked(self): 
 #         sourcesFile = QtGui.QFileDialog.getOpenFileName(self, 'Select Resources properties')
-#         self.__simsource= SimulationResources([sourcesFile,'w'])
+#         self.__simsource= CompilerResources([sourcesFile,'w'])
         ''' processing absolute path of .mo file into path and file '''
         self.__simsource.cimFolder= str(self.txtCIMFolder.text())
         self.__simsource.modelFolder= str(self.txtModelsFolder.text())

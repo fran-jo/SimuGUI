@@ -21,7 +21,7 @@ class SimulationOMC():
         sys.argv[3]: file containing the name of outputs of the model to be saved in h5 and plotted
         '''
         ''' Loading simulations resources. Parameters related to models to be simulated and libraries'''
-        self.sources= simctrl.SimulationResources([sys.argv[1],'r'])
+        self.sources= simctrl.CompilerResources([sys.argv[1],'r'])
         ''' Loading configuration values for the simulator solver '''
         self.config= simctrl.SimulationConfigurationOMC(sys.argv[2])
         ''' Loading output variables of the model, their values will be stored in h5 and plotted '''

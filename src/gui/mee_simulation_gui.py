@@ -57,7 +57,10 @@ class UI_Simulation(QtGui.QDialog, form_gui):
             self.txtCompiler.setText(self.__simconfig.compiler)
             self.txtStartTime.setText(self.__simconfig.startTime)
             self.txtStopTime.setText(self.__simconfig.stopTime)
-            self.txtInterval.setText(self.__simconfig.numberOfIntervals)
+            if self.__simconfig.numberOfIntervals!= '-1':
+                self.txtInterval.setText(self.__simconfig.numberOfIntervals)
+            else:
+                self.txtInterval.setText(self.__simconfig.fixStepSize)
             self.txtTolerance.setText(self.__simconfig.tolerance)
             self.txtSolver.setText(self.__simconfig.method)
             
