@@ -39,9 +39,9 @@
    <property name="geometry">
     <rect>
      <x>430</x>
-     <y>40</y>
+     <y>30</y>
      <width>490</width>
-     <height>401</height>
+     <height>411</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -63,9 +63,9 @@
     <property name="geometry">
      <rect>
       <x>-1</x>
-      <y>20</y>
+      <y>21</y>
       <width>491</width>
-      <height>331</height>
+      <height>351</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -91,7 +91,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>350</y>
+      <y>370</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -121,8 +121,8 @@
     <rect>
      <x>10</x>
      <y>50</y>
-     <width>421</width>
-     <height>300</height>
+     <width>411</width>
+     <height>350</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -139,21 +139,31 @@
    </property>
    <property name="maximumSize">
     <size>
-     <width>470</width>
-     <height>300</height>
+     <width>460</width>
+     <height>350</height>
     </size>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>297</width>
-     <height>27</height>
+     <width>831</width>
+     <height>28</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Simulation Signal</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="txtNameSignal"/>
+    </item>
     <item>
      <widget class="QLabel" name="label">
       <property name="sizePolicy">
@@ -205,9 +215,23 @@
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Measurement Signal</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="txtNameMeas">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>

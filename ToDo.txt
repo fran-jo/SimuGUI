@@ -6,3 +6,8 @@ Insert into tab python plot with sim results
 ScriptMAE
 
 simular ieee 9 bus
+
+T.1 - Export Table (mode_estimation_gui) into excel table
+T.3 - Code for save/load results (mode_estimation_gui) in H5 database
+T.4 - streammodeh5 add function to write h5 files with modes
+T.5 - button save / load of mode_estimation_gui, use T.4

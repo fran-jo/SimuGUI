@@ -18,6 +18,8 @@ __form_gui = uic.loadUiType("./res/mae_signalanalysis_gui.ui")[0] # Load the UI
 class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
     __simulation= {}
     __measurement= {}
+    __nameSimulationSignal= ''
+    __nameMeasurementSignal= ''
     __simudb= None
     __measdb= None
 
@@ -135,9 +137,11 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         for baseNode in getSelected:
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
+            self.__nameSimulationSignal= parentName+'.'+childName
             if self.__simudb.exist_PowerSystemResource(str(parentName)):
                 self.__simudb.select_PowerSystemResource(str(parentName))
                 self.__simudb.select_AnalogMeasurement(str(childName))
+                self.__simulation= self.__simudb.analogMeasurementValues
                 self.__view_Simulation(self.__simudb.analogMeasurementValues)
 
     def __view_Simulation(self, selectedSignal):
@@ -187,9 +191,11 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         for baseNode in getSelected:
             parentName= str(baseNode.parent().text(0))
             childName= baseNode.text(0)
+            self.__nameMeasurementSignal= parentName+'.'+childName
             if self.__measdb.exist_PowerSystemResource(str(parentName)):
                 self.__measdb.select_PowerSystemResource(str(parentName))
                 self.__measdb.select_AnalogMeasurement(str(childName))
+                self.__measurement= self.__measdb.analogMeasurementValues
                 self.__view_Measurement(self.__measdb.analogMeasurementValues)
         
     def __view_Measurement(self, measurement):
@@ -210,6 +216,8 @@ class UI_SignalAnalysis(QtGui.QDialog, __form_gui):
         
     def show_meGUI(self):
         modedialog = UI_ModeEstimation(self)
+        modedialog.nameSimulationSignal= self.__nameSimulationSignal
+        modedialog.nameMeasurementSignal= self.__nameMeasurementSignal
         modedialog.simulationSignal= self.__simulation if not self.__simulation== {} else {}
         modedialog.measurementSignal= self.__measurement if not self.__measurement== {} else {}
         modedialog.setWindowTitle('Signal Mode Estimation')

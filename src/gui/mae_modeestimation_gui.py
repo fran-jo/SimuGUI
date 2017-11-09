@@ -5,7 +5,7 @@ Created on 19 jan 2016
 '''
 
 import os
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, uic
 from PyQt4.QtCore import QString
 from methods import MethodAmbientAnalysis
 from matplotlib.figure import Figure
@@ -34,6 +34,7 @@ class UI_ModeEstimation(QtGui.QDialog, __form_gui):
         self.__measurement= {}
         #
         self.btnClose.clicked.connect(self.closeForm)
+        self.chb_meassignal.clicked.connect(self.allowMeasurementSignal)
     
     def createGraficaMeas(self):
         self.figureGM = Figure()
@@ -51,6 +52,12 @@ class UI_ModeEstimation(QtGui.QDialog, __form_gui):
         layoutGM.setContentsMargins(0,0,0,0)
         self.widgettoolbar.setLayout(layoutGM)
         
+    def allowMeasurementSignal(self):
+        if self.chb_meassignal.isChecked():
+            self.txtNameMeas.setEnabled(True)
+        else:
+            self.txtNameMeas.setEnabled(False)
+            
     @property
     def simulationSignal(self):
         return self.__simulation
@@ -63,6 +70,20 @@ class UI_ModeEstimation(QtGui.QDialog, __form_gui):
     @measurementSignal.setter
     def measurementSignal(self, value):
         self.__measurement= value
+        
+    @property
+    def nameSimulationSignal(self):
+        return self.txtNameSignal.text()
+    @nameSimulationSignal.setter
+    def nameSimulationSignal(self, value):
+        self.txtNameSignal.setText(value)
+        
+    @property
+    def nameMeasurementSignal(self):
+        return self.txtNameMeas.text()
+    @nameMeasurementSignal.setter
+    def nameMeasurementSignal(self, value):
+        self.txtNameMeas.setText(value)
         
     def onStart_basicMethod(self):
         self.tbw_modes.setRowCount(0)
@@ -86,8 +107,8 @@ class UI_ModeEstimation(QtGui.QDialog, __form_gui):
             self.tbw_modes.setItem(rowPosition, 0, QtGui.QTableWidgetItem('Mode '+ str(rowPosition)))
             self.tbw_modes.setItem(rowPosition, 1, QtGui.QTableWidgetItem(str(mode.real)))
             self.tbw_modes.setItem(rowPosition, 2, QtGui.QTableWidgetItem(str(mode.imag)))
-            xmode.append(mode.real)
-            ymode.append(mode.imag)
+            xmode.append(mode.imag)
+            ymode.append(mode.real)
 #         self.plotmodes.scatter(xmode, ymode, 
 #                                xlabel= "Damping", ylabel= "Frequency", title= "Modes", 
 #                                c= 'b', marker= 'o')
@@ -103,8 +124,8 @@ class UI_ModeEstimation(QtGui.QDialog, __form_gui):
                 if rowPosition> self.tbw_modes.rowCount():
                     self.tbw_modes.insertRow(rowPosition)
                 rowPosition= rowPosition+ 1
-                xmode.append(mode.real)
-                ymode.append(mode.imag)
+                xmode.append(mode.imag)
+                ymode.append(mode.real)
 #             self.plotmodes.scatter(xmode, ymode, 
 #                                    xlabel= "Damping", ylabel= "Frequency", title= "Modes",
 #                                    c= 'r', marker= '+')
